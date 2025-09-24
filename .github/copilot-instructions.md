@@ -14,7 +14,7 @@ Security: Prioritize security to prevent vulnerabilities (e.g., XSS, CSRF). For 
 - Mitigation strategies (e.g., zod for validation).
 - OWASP or Next.js references.
 - Test to verify mitigation.
-- Use secure defaults (e.g., arktype) and avoid unsafe practices (e.g., eval).
+- Use secure defaults (e.g., zod) and avoid unsafe practices (e.g., eval).
 
 Performance and Robustness: Optimize for performance, reliability, and scalability:
 
@@ -26,7 +26,7 @@ Performance and Robustness: Optimize for performance, reliability, and scalabili
 
 Operational Concerns: Ensure code is production-ready, addressing:
 
-- Hosting: Compatibility with sst, minimal reliance on third party services.
+- Hosting: Compatibility with vercel, minimal reliance on third party services.
 - Management: Use .env for configuration.
 - Maintenance: Write self-documenting code, update status.md, and run npm audit.
 
