@@ -1,4 +1,4 @@
-import { Building2, Badge, User, Calendar } from "lucide-react";
+import { Building2, Badge, User, Calendar, Inbox } from "lucide-react";
 import { Avatar, AvatarFallback } from "~/components/ui/avatar";
 import {
   Card,
@@ -31,9 +31,17 @@ export default function InviteList({
 }) {
   if (invites.length === 0) {
     return (
-      <div className="text-muted-foreground text-center">
-        No organization invites found.
-      </div>
+      <Card className="w-full">
+        <CardContent className="pt-6">
+          <div className="py-12 text-center">
+            <Inbox className="text-muted-foreground mx-auto mb-4 h-16 w-16" />
+            <h3 className="mb-2 text-xl font-medium">No invites found</h3>
+            <p className="text-muted-foreground mb-6">
+              You have no pending organization invites.
+            </p>
+          </div>
+        </CardContent>
+      </Card>
     );
   }
 

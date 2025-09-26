@@ -72,7 +72,7 @@ export function CreateOrganizationButton() {
         <DialogHeader>
           <DialogTitle>Create New Organization</DialogTitle>
           <DialogDescription>
-            Create a new organization to collaborate with your team. You&amp;ll
+            Create a new organization to collaborate with your team. You&apos;ll
             be the admin of this organization.
           </DialogDescription>
         </DialogHeader>
