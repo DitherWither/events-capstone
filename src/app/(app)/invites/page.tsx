@@ -5,19 +5,25 @@ import { fetchMyOrganizationInvites } from "~/server/organization";
 export default function InvitesPage() {
   return (
     <>
-      <div className="mb-8">
-        <h2 className="text-foreground mb-4 text-xl font-semibold">
-          Pending Invites
-        </h2>
+      <div className="container mx-auto max-w-4xl px-4 py-8">
+        <div className="mb-8">
+          <h1 className="text-foreground mb-2 text-3xl font-bold">
+            Organization Invites
+          </h1>
+          <p className="text-muted-foreground">
+            Manage your pending organization invitations and view your invite
+            history.
+          </p>
+        </div>
         <div className="space-y-4">
           <Suspense
             fallback={
-              <div className="text-center text-muted-foreground">
+              <div className="text-muted-foreground text-center">
                 Loading invites...
               </div>
             }
           >
-            <MyInvitesList/>
+            <MyInvitesList />
           </Suspense>
         </div>
       </div>
@@ -30,7 +36,7 @@ async function MyInvitesList() {
 
   if (error || !invites) {
     return (
-      <div className="text-center text-destructive">
+      <div className="text-destructive text-center">
         Error loading invites: {error ?? "An unknown error occurred."}
       </div>
     );

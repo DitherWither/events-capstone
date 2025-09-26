@@ -1,4 +1,4 @@
-import { ExternalLink, Badge, Calendar, Building2, Users } from "lucide-react";
+import { ExternalLink, Calendar, Building2, Users } from "lucide-react";
 import Link from "next/link";
 import { getInitials, formatDate } from "~/lib/utils";
 import { type OrganizationMembership } from "~/server/db/types";
@@ -10,6 +10,7 @@ import {
   CardContent,
 } from "../ui/card";
 import { Avatar, AvatarFallback } from "../ui/avatar";
+import { Badge } from "../ui/badge";
 
 const getRoleColor = (role: string) => {
   switch (role.toLowerCase()) {
