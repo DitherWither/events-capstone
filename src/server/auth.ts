@@ -32,6 +32,10 @@ export async function getUserId(): Promise<number | null> {
   const cookieStore = await cookies();
   const userId = cookieStore.get("userId")?.value;
 
+  // TODO: do something to delete invalid cookie
+  // right now we can't just delete it here as this function is used in
+  // page render (where we can't set cookies)
+
   if (!userId) {
     return null;
   }
@@ -41,12 +45,10 @@ export async function getUserId(): Promise<number | null> {
     parsedUserId = parseInt(userId);
     if (isNaN(parsedUserId)) {
       console.error("Invalid userId in cookie:", userId);
-      await setUserIdCookie("");
       return null;
     }
   } catch (error) {
     console.error("Error parsing userId:", error);
-    await setUserIdCookie("");
     return null;
   }
 
@@ -186,25 +188,22 @@ export async function getCurrentUser(): Promise<
     parsedUserId = parseInt(userId);
     if (isNaN(parsedUserId)) {
       console.error("Invalid userId in cookie:", userId);
-      await setUserIdCookie("");
       return failure(
-        `Invalid userId in cookie: ${userId}. Deleted invalid cookie, try refreshing`,
+        `Invalid userId in cookie: ${userId}. Please delete invalid cookie, then refresh`,
       );
     }
   } catch (error) {
     console.error("Error parsing userId:", error);
-    await setUserIdCookie("");
     return failure(
-      "Error parsing user ID from cookie. Deleted invalid cookie, try refreshing",
+      "Error parsing user ID from cookie. Please delete invalid cookie, then refresh",
     );
   }
 
   const userResult = await findUserById(parsedUserId);
 
   if (userResult.error) {
-    await setUserIdCookie("");
     return failure(
-      `Failed to find user: ${userResult.error}. Deleted invalid cookie, try refreshing`,
+      `Failed to find user: ${userResult.error}. Please delete invalid cookie, and then refresh`,
     );
   }
 

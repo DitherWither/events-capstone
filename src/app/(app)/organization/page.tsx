@@ -1,18 +1,23 @@
 import { Suspense } from "react";
+import { CreateOrganizationButton } from "~/components/organization/organization-create";
 import { OrganizationList } from "~/components/organization/organization-list";
 import { fetchMyOrganizationMemberships } from "~/server/organization";
 
 export default async function OrganizationPage() {
   return (
     <div className="container mx-auto max-w-4xl px-4 py-8">
-      <div className="mb-8">
-        <h1 className="text-foreground mb-2 text-3xl font-bold">
-          My Organizations
-        </h1>
-        <p className="text-muted-foreground">
-          Organizations you&amp;re a member of. Click on any organization to
-          view details and manage settings.
-        </p>
+      <div className="mb-12 flex items-center justify-between">
+        <div>
+          <h1 className="text-foreground mb-2 text-3xl font-bold">
+            My Organizations
+          </h1>
+          <p className="text-muted-foreground">
+            Organizations you&amp;re a member of. Click on any organization to
+            view details and manage settings.
+          </p>
+        </div>
+
+        <CreateOrganizationButton />
       </div>
 
       <div className="space-y-4">

@@ -8,17 +8,7 @@ import {
 import { db } from ".";
 import { and, count, eq } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
-import type {
-  OrganizationMemberRole,
-  OrganizationInvite,
-  OrganizationInviteState,
-  OrganizationMembership,
-} from "./types";
-
-/**
- * Organization data type inferred from the database schema
- */
-// Types moved to `src/server/db/types.ts` and re-exported above
+import type { OrganizationInvite, OrganizationInviteState, OrganizationMemberRole, OrganizationMembership } from "./types";
 
 /**
  * Creates a new organization in the database
@@ -68,10 +58,6 @@ export async function addOrganizationMember(
       userId: member.userId,
       role: member.role ?? "member",
     });
-
-    if (!result) {
-      return failure("Failed to add organization member");
-    }
 
     return success(void 0);
   } catch (error) {
@@ -310,20 +296,15 @@ export async function getUserOrganizationMemberships(
           description: organizations.description,
           createdAt: organizations.createdAt,
           memberCount: count(otherMembers.userId),
-        },
+        }
       })
       .from(organizationMembers)
       .where(eq(organizationMembers.userId, userId))
-      .leftJoin(
-        organizations,
-        eq(organizationMembers.organizationId, organizations.id),
-      )
+      .leftJoin(organizations, eq(organizationMembers.organizationId, organizations.id))
       .leftJoin(otherMembers, eq(otherMembers.organizationId, organizations.id))
-      .groupBy(organizationMembers.userId);
-
-    const membershipsWithOrgs = memberships.filter(
-      (m) => m.organization !== null,
-    ) as OrganizationMembership[];
+      .groupBy(organizationMembers.userId, organizationMembers.organizationId, organizations.id);
+    
+      const membershipsWithOrgs = memberships.filter(m => m.organization !== null) as OrganizationMembership[];
 
     return success(membershipsWithOrgs);
   } catch (error) {

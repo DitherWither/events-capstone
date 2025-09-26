@@ -1,3 +1,5 @@
+"use server";
+
 import { failure, success, type Result } from "~/lib/try-catch";
 import {
   addOrganizationMember,
@@ -15,8 +17,10 @@ import type {
 } from "./db/types";
 import { getUserId } from "./auth";
 import { findUserByEmail } from "./db/user";
+import { cache } from "react";
+import { revalidatePath } from "next/cache";
 
-export async function getAuthOrganization(
+async function getAuthOrganization(
   organizationId: number,
 ): Promise<
   Result<{ role: OrganizationMemberRole | null; userId: number }, string>
@@ -68,6 +72,7 @@ export async function newOrganization(orgInfo: {
   if (!userId) {
     return failure("User must be logged in to create an organization");
   }
+  // TODO: this should be run in a transaction
 
   const createOrgResult = await createOrganization({
     name: orgInfo.name,
@@ -88,6 +93,8 @@ export async function newOrganization(orgInfo: {
   if (addMemberResult.error) {
     return failure(addMemberResult.error);
   }
+
+  revalidatePath("/organization/");
 
   return success(orgId);
 }
@@ -125,6 +132,9 @@ export async function inviteToOrganization(
   if (addMemberResult.error) {
     return failure(addMemberResult.error);
   }
+
+  revalidatePath("/organization/" + orgId);
+  revalidatePath("/invites");
 
   return success(void 0);
 }
@@ -208,7 +218,10 @@ export async function cancelOrganizationInvite(
   }
 
   // Now we can cancel the invite
-  return await cancelOrganizationInvite(inviteId);
+  const res = await cancelOrganizationInvite(inviteId);
+  revalidatePath("/organization/" + invite.organization.id);
+  revalidatePath("/invites");
+  return res;
 }
 
 /**
@@ -279,10 +292,14 @@ export async function respondToOrganizationInvite(
   }
 
   // Update the invite state to accepted or declined
-  return await setOrganizationInviteState(
+  const res = await setOrganizationInviteState(
     inviteId,
     accept ? "accepted" : "declined",
   );
+
+  revalidatePath("/organization/" + invite.organization.id);
+  revalidatePath("/invites");
+  return res;
 }
 
 /**

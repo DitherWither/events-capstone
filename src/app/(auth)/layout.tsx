@@ -25,7 +25,7 @@ export default async function AuthLayout({
   }
 
   if (user) {
-    redirect("/inbox");
+    redirect("/");
   }
 
   return (
