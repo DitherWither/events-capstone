@@ -1,6 +1,6 @@
 import useSWR from "swr";
 import { getCurrentUser } from "~/server/auth";
-import type { PublicUser } from "~/server/db/user";
+import type { PublicUser } from "~/server/db/types";
 
 export function useAuth():
   | {

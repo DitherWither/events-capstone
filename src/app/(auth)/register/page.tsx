@@ -1,7 +1,6 @@
 "use client";
 import { AlertCircleIcon, GalleryVerticalEnd } from "lucide-react";
 
-import { cn } from "~/lib/utils";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
@@ -36,7 +35,7 @@ export default function RegisterForm() {
           return;
         }
 
-        const { data, error } = await register({ name, email, password });
+        const { error } = await register({ name, email, password });
 
         if (error) {
           if (typeof error === "string") {

@@ -9,8 +9,8 @@ import {
   findUserById,
   userExistsByEmail,
   toPublicUser,
-  type PublicUser,
 } from "./db/user";
+import type { PublicUser } from "./db/types";
 import { failure, success, type Result } from "~/lib/try-catch";
 
 /**
@@ -26,6 +26,31 @@ async function setUserIdCookie(value: string) {
     secure: process.env.NODE_ENV === "production",
     sameSite: "strict",
   });
+}
+
+export async function getUserId(): Promise<number | null> {
+  const cookieStore = await cookies();
+  const userId = cookieStore.get("userId")?.value;
+
+  if (!userId) {
+    return null;
+  }
+
+  let parsedUserId: number;
+  try {
+    parsedUserId = parseInt(userId);
+    if (isNaN(parsedUserId)) {
+      console.error("Invalid userId in cookie:", userId);
+      await setUserIdCookie("");
+      return null;
+    }
+  } catch (error) {
+    console.error("Error parsing userId:", error);
+    await setUserIdCookie("");
+    return null;
+  }
+
+  return parsedUserId;
 }
 
 /**
