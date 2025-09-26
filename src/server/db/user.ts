@@ -2,16 +2,7 @@ import { eq } from "drizzle-orm";
 import { db } from "./index";
 import { users } from "./schema";
 import { failure, success, type Result } from "~/lib/try-catch";
-
-/**
- * User data type inferred from the database schema
- */
-export type User = typeof users.$inferSelect;
-
-/**
- * User data type for public operations (excludes sensitive fields)
- */
-export type PublicUser = Omit<User, "passwordHash">;
+import type { User, PublicUser } from "./types";
 
 /**
  * Creates a new user in the database
@@ -49,7 +40,7 @@ export async function createUser(userData: {
  */
 export async function findUserByEmail(
   email: string,
-): Promise<Result<User, string>> {
+): Promise<Result<User | null, string>> {
   try {
     const [user] = await db
       .select()
@@ -57,11 +48,7 @@ export async function findUserByEmail(
       .where(eq(users.email, email))
       .limit(1);
 
-    if (!user) {
-      return failure("User not found");
-    }
-
-    return success(user);
+    return success(user ?? null);
   } catch (error) {
     console.error("Database error during user lookup by email:", error);
     return failure("Database error during user lookup");
