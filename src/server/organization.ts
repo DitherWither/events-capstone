@@ -17,7 +17,6 @@ import type {
 } from "./db/types";
 import { getUserId } from "./auth";
 import { findUserByEmail } from "./db/user";
-import { cache } from "react";
 import { revalidatePath } from "next/cache";
 
 async function getAuthOrganization(
@@ -133,8 +132,7 @@ export async function inviteToOrganization(
     return failure(addMemberResult.error);
   }
 
-  revalidatePath("/organization/" + orgId);
-  revalidatePath("/invites");
+  revalidatePath("/organization");
 
   return success(void 0);
 }
@@ -219,8 +217,7 @@ export async function cancelOrganizationInvite(
 
   // Now we can cancel the invite
   const res = await cancelOrganizationInvite(inviteId);
-  revalidatePath("/organization/" + invite.organization.id);
-  revalidatePath("/invites");
+  revalidatePath("/organization");
   return res;
 }
 
@@ -297,8 +294,7 @@ export async function respondToOrganizationInvite(
     accept ? "accepted" : "declined",
   );
 
-  revalidatePath("/organization/" + invite.organization.id);
-  revalidatePath("/invites");
+  revalidatePath("/organization");
   return res;
 }
 
