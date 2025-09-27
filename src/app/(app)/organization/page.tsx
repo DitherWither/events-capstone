@@ -26,7 +26,7 @@ export default async function OrganizationPage() {
         </div>
 
         <div className="space-y-4">
-          <Suspense fallback={<LoadingCard />}>
+          <Suspense fallback={<LoadingCard name={"Organizations"} />}>
             <MyOrganizations />
           </Suspense>
         </div>
@@ -39,7 +39,7 @@ export default async function OrganizationPage() {
       <div className="space-y-4">
         <Suspense
           fallback={
-            <LoadingCard />
+            <LoadingCard name="Invites" />
           }
         >
           <MyInvitesList />
