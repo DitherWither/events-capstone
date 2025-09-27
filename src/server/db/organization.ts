@@ -8,7 +8,7 @@ import {
 import { db } from ".";
 import { and, count, eq } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
-import type { OrganizationInvite, OrganizationInviteState, OrganizationMemberRole, OrganizationMembership } from "./types";
+import type { Organization, OrganizationInvite, OrganizationInviteState, OrganizationMemberRole, OrganizationMembership } from "./types";
 
 /**
  * Creates a new organization in the database
@@ -53,7 +53,7 @@ export async function addOrganizationMember(
   member: OrgMember,
 ): Promise<Result<void, string>> {
   try {
-    const [result] = await db.insert(organizationMembers).values({
+     await db.insert(organizationMembers).values({
       organizationId: orgId,
       userId: member.userId,
       role: member.role ?? "member",
@@ -268,6 +268,69 @@ export async function getOrganizationInviteById(
   } catch (error) {
     console.error("Database error during fetching invite by ID:", error);
     return failure("Database error during fetching invite by ID");
+  }
+}
+
+/**
+ * Get organization details by ID
+ *
+ * @param orgId - The ID of the organization
+ * @returns Result with organization details on success, error message on failure
+ */
+export async function getOrganizationById(
+  orgId: number,
+): Promise<Result<Organization | null, string>> {
+  try {
+    const org = await db
+      .select({
+        id: organizations.id,
+        name: organizations.name,
+        description: organizations.description,
+        createdAt: organizations.createdAt,
+        members: {
+          role: organizationMembers.role,
+          joinedAt: organizationMembers.joinedAt,
+        },
+        user: {
+          id: users.id,
+          name: users.name,
+          email: users.email,
+          createdAt: users.createdAt,
+        }
+      })
+      .from(organizations)
+      .where(eq(organizations.id, orgId))
+      .leftJoin(
+        organizationMembers,
+        eq(organizationMembers.organizationId, organizations.id),
+      )
+      .leftJoin(users, eq(organizationMembers.userId, users.id));
+
+    if (org.length === 0) {
+      return success(null); // Organization not found
+    }
+
+    const orgFirst = org[0]!;
+
+    const organization: Organization = {
+      id: orgFirst.id,
+      name: orgFirst.name,
+      description: orgFirst.description,
+      createdAt: orgFirst.createdAt,
+      members: org
+        .filter((m) => m.members !== null && m.user !== null)
+        .map((m) => ({
+          user: m.user,
+          role: m.members!.role,
+          joinedAt: m.members!.joinedAt,
+        })),
+    };
+
+    return success(organization);
+  }
+  catch (error) {
+    console.error("Database error during fetching organization by ID:", error);
+    return failure("Database error during fetching organization by ID");
   }
 }
 

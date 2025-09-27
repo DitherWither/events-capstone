@@ -63,9 +63,9 @@ export default function RegisterForm() {
           <div className="flex size-8 items-center justify-center rounded-md">
             <GalleryVerticalEnd className="size-6" />
           </div>
-          <span className="sr-only">Cappuchino Mail</span>
+          <span className="sr-only">Cappuchino Events</span>
         </Link>
-        <h1 className="text-xl font-bold">Welcome to Cappuchino Mail</h1>
+        <h1 className="text-xl font-bold">Welcome to Cappuchino Events</h1>
         <div className="text-center text-sm">
           Already have an account?{" "}
           <Link href="/login" className="underline underline-offset-4">

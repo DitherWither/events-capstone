@@ -1,4 +1,4 @@
-import { ExternalLink, Calendar, Building2, Users } from "lucide-react";
+import { ExternalLink, Calendar, Building2, Users, Loader } from "lucide-react";
 import Link from "next/link";
 import { getInitials, formatDate } from "~/lib/utils";
 import { type OrganizationMembership } from "~/server/db/types";
@@ -10,20 +10,7 @@ import {
   CardContent,
 } from "../ui/card";
 import { Avatar, AvatarFallback } from "../ui/avatar";
-import { Badge } from "../ui/badge";
-
-const getRoleColor = (role: string) => {
-  switch (role.toLowerCase()) {
-    case "admin":
-      return "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200";
-    case "member":
-      return "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200";
-    case "contributor":
-      return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200";
-    default:
-      return "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200";
-  }
-};
+import { RoleBadge } from "./role-badge";
 
 function OrganizationCard({
   membership,
@@ -36,7 +23,7 @@ function OrganizationCard({
       href={`/organization/${membership.organization.id}`}
     >
       <Card className="group w-full cursor-pointer transition-shadow hover:shadow-md">
-        <div className="flex items-start justify-start gap-4">
+        <div className="flex items-start justify-start">
           <Avatar className="ml-5 h-14 w-14">
             <AvatarFallback className="text-lg font-semibold">
               {getInitials(membership.organization.name)}
@@ -57,9 +44,7 @@ function OrganizationCard({
                       "No description available"}
                   </CardDescription>
                 </div>
-                <Badge className={getRoleColor(membership.role)}>
-                  {membership.role}
-                </Badge>
+                <RoleBadge role={membership.role} />
               </div>
             </CardHeader>
             <CardContent>
@@ -120,4 +105,17 @@ export function OrganizationList({
       membership={membership}
     />
   ));
+}
+
+export function LoadingCard({ name }: { name: string }) {
+  return (
+    <Card className="w-full">
+      <CardContent className="pt-6">
+        <div className="py-12 text-center">
+          <Loader className="mx-auto mb-4 h-16 w-16 animate-spin" />
+          <h3 className="mb-2 text-xl font-medium">Loading {name}</h3>
+        </div>
+      </CardContent>
+    </Card>
+  );
 }

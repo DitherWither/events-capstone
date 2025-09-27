@@ -1,8 +1,7 @@
-import Link from "next/link";
 import { Suspense } from "react";
 import InviteList from "~/components/organization/invites/invite-list";
 import { CreateOrganizationButton } from "~/components/organization/organization-create";
-import { OrganizationList } from "~/components/organization/organization-list";
+import { LoadingCard, OrganizationList } from "~/components/organization/organization-list";
 import {
   fetchMyOrganizationInvites,
   fetchMyOrganizationMemberships,
@@ -27,7 +26,7 @@ export default async function OrganizationPage() {
         </div>
 
         <div className="space-y-4">
-          <Suspense fallback={<div>Loading...</div>}>
+          <Suspense fallback={<LoadingCard />}>
             <MyOrganizations />
           </Suspense>
         </div>
@@ -40,9 +39,7 @@ export default async function OrganizationPage() {
       <div className="space-y-4">
         <Suspense
           fallback={
-            <div className="text-muted-foreground text-center">
-              Loading invites...
-            </div>
+            <LoadingCard />
           }
         >
           <MyInvitesList />

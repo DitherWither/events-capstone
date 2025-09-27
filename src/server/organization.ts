@@ -4,6 +4,7 @@ import { failure, success, type Result } from "~/lib/try-catch";
 import {
   addOrganizationMember,
   createOrganization,
+  getOrganizationById,
   getOrganizationInviteById,
   getOrganizationInvitesForUser,
   getUserOrganizationMemberships,
@@ -11,6 +12,7 @@ import {
   setOrganizationInviteState,
 } from "./db/organization";
 import type {
+  Organization,
   OrganizationInvite,
   OrganizationMemberRole,
   OrganizationMembership,
@@ -328,4 +330,36 @@ export async function fetchMyOrganizationMemberships(): Promise<
   }
 
   return await getUserOrganizationMemberships(userId);
+}
+
+/**
+ * Fetches a specific organization for the authenticated user
+ * 
+ * @returns Result with organization on success, error message on failure
+ */
+export async function fetchOrganizationById(orgId: number): Promise<
+  Result<Organization | null, string>
+> {
+  const userId = await getUserId();
+  if (!userId) {
+    return failure("User must be logged in to view organizations");
+  }
+
+  const { data: organization, error } = await getOrganizationById(orgId);
+  if (error) {
+    return failure(error);
+  }
+
+  if (!organization) {
+    return success(null);
+  }
+
+  // Make sure the user is a member of the organization
+  for (const member of organization.members) {
+    if (member.user?.id === userId) {
+      return success(organization);
+    }
+  }
+
+  return failure("User is not a member of this organization");
 }
