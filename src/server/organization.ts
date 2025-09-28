@@ -25,6 +25,7 @@ import { getUserId } from "./auth";
 import { findUserByEmail } from "./db/user";
 import { revalidatePath } from "next/cache";
 import { cache } from "react";
+import { db } from "./db";
 
 export async function getAuthOrganization(
   organizationId: number,
@@ -80,29 +81,44 @@ export async function newOrganization(orgInfo: {
   }
   // TODO: this should be run in a transaction
 
-  const createOrgResult = await createOrganization({
-    name: orgInfo.name,
-    description: orgInfo.description,
-  });
+  try {
+    const res = await db.transaction(async (tx) => {
+      const createOrgResult = await createOrganization(
+        {
+          name: orgInfo.name,
+          description: orgInfo.description,
+        },
+        tx,
+      );
 
-  if (createOrgResult.error) {
-    return failure(createOrgResult.error);
+      if (createOrgResult.error) {
+        tx.rollback();
+      }
+
+      const orgId = createOrgResult.data!;
+
+      const addMemberResult = await addOrganizationMember(
+        orgId,
+        {
+          userId,
+          role: "admin",
+        },
+        tx,
+      );
+
+      if (addMemberResult.error) {
+        tx.rollback();
+      }
+
+      return orgId;
+    });
+
+    revalidatePath("/organization/");
+    return success(res);
+  } catch (e) {
+    console.error("Failed to create organization:", e);
+    return failure("Failed to create organization");
   }
-
-  const orgId = createOrgResult.data!;
-
-  const addMemberResult = await addOrganizationMember(orgId, {
-    userId,
-    role: "admin",
-  });
-
-  if (addMemberResult.error) {
-    return failure(addMemberResult.error);
-  }
-
-  revalidatePath("/organization/");
-
-  return success(orgId);
 }
 
 /**

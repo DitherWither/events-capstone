@@ -5,7 +5,7 @@ import {
   organizations,
   users,
 } from "./schema";
-import { db } from ".";
+import { db, type TransactionType } from ".";
 import { and, count, eq, ne } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 import type {
@@ -23,12 +23,15 @@ import type {
  * @param orgData - The organization data to insert
  * @returns Result with organization ID on success, error message on failure
  */
-export async function createOrganization(orgData: {
-  name: string;
-  description?: string;
-}): Promise<Result<number, string>> {
+export async function createOrganization(
+  orgData: {
+    name: string;
+    description?: string;
+  },
+  tx?: TransactionType,
+): Promise<Result<number, string>> {
   try {
-    const [result] = await db
+    const [result] = await (tx ?? db)
       .insert(organizations)
       .values(orgData)
       .returning({ id: organizations.id });
@@ -58,9 +61,10 @@ type OrgMember = {
 export async function addOrganizationMember(
   orgId: number,
   member: OrgMember,
+  tx?: TransactionType,
 ): Promise<Result<void, string>> {
   try {
-    await db.insert(organizationMembers).values({
+    await (tx ?? db).insert(organizationMembers).values({
       organizationId: orgId,
       userId: member.userId,
       role: member.role ?? "member",
