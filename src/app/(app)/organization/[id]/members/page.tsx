@@ -7,7 +7,6 @@ import { OrganizationMembersList } from "~/components/organization/members-list"
 import { Button } from "~/components/ui/button";
 import { getUserId } from "~/server/auth";
 import {
-  fetchMyOrganizationInvites,
   fetchOrganizationById,
   fetchOrganizationInvites,
 } from "~/server/organization";
@@ -75,7 +74,7 @@ async function MyMembersList({ id }: { id: number }) {
           </InviteButton>
         )}
       </div>
-      <OrganizationMembersList members={organization.members} />
+      <OrganizationMembersList members={organization.members} organizationId={id} currentUser={currentMember}/>
     </>
   );
 }

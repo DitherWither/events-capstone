@@ -11,7 +11,10 @@ import {
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { Separator } from "~/components/ui/separator";
-import { fetchOrganizationById } from "~/server/organization";
+import {
+  fetchOrganizationById,
+  getAuthOrganization,
+} from "~/server/organization";
 
 export default async function OrganizationPage({
   params,
@@ -48,10 +51,13 @@ export default async function OrganizationPage({
 }
 
 async function OrganizationDetails({ id }: { id: number }) {
-  const { data: organization, error } = await fetchOrganizationById(id);
+  const [
+    { data: organization, error: orgFetchError },
+    { data: auth, error: authFetchError },
+  ] = await Promise.all([fetchOrganizationById(id), getAuthOrganization(id)]);
 
-  if (error) {
-    return <div className="text-red-500">Error: {error}</div>;
+  if (orgFetchError || authFetchError || !auth) {
+    return <div className="text-red-500">Error: {authFetchError ?? orgFetchError}</div>;
   }
 
   if (!organization) {
@@ -60,7 +66,7 @@ async function OrganizationDetails({ id }: { id: number }) {
 
   return (
     <div className="flex items-start justify-between">
-      <OrganizationHeading organization={organization} />
+      <OrganizationHeading organization={organization} role={auth.role} />
     </div>
   );
 }

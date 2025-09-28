@@ -74,6 +74,34 @@ export async function addOrganizationMember(
 }
 
 /**
+ * Removes a member from an organization
+ *
+ * @param orgId - The ID of the organization
+ * @param userId - The ID of the user to remove
+ * @returns Result with void on success, error message on failure
+ */
+export async function removeOrganizationMember(
+  orgId: number,
+  userId: number,
+): Promise<Result<void, string>> {
+  try {
+    const result = await db
+      .delete(organizationMembers)
+      .where(
+        and(
+          eq(organizationMembers.organizationId, orgId),
+          eq(organizationMembers.userId, userId),
+        ),
+      );
+
+    return success(void 0);
+  } catch (error) {
+    console.error("Database error during removing organization member:", error);
+    return failure("Database error during removing organization member");
+  }
+}
+
+/**
  * Creates an organization invite
  *
  * @param orgId - The ID of the organization
