@@ -2,9 +2,9 @@
 
 import { AlertCircle } from "lucide-react";
 import { useState } from "react";
-import { Alert, AlertDescription } from "../ui/alert";
-import { Button } from "../ui/button";
-import { Input } from "../ui/input";
+import { Alert, AlertDescription } from "~/components/ui/alert";
+import { Button } from "~/components/ui/button";
+import { Input } from "~/components/ui/input";
 import {
   Dialog,
   DialogContent,
@@ -13,47 +13,51 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "../ui/dialog";
-import { Label } from "../ui/label";
-import { Textarea } from "../ui/textarea";
-import { newOrganization } from "~/server/organization";
+} from "~/components/ui/dialog";
+import { Label } from "~/components/ui/label";
+import { Textarea } from "~/components/ui/textarea";
+import { inviteToOrganization, newOrganization } from "~/server/organization";
 
-export function CreateOrganizationButton({
+export function InviteButton({
   children,
+  orgId,
 }: {
   children?: React.ReactNode;
+  orgId: number;
 }) {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
 
   return (
-    <ManuallyOpenedCreateOrganizationDialog
+    <ManuallyOpenedInviteDialog
+      orgId={orgId}
       isOpen={isCreateDialogOpen}
       onOpenChange={setIsCreateDialogOpen}
     >
       {children}
-    </ManuallyOpenedCreateOrganizationDialog>
+    </ManuallyOpenedInviteDialog>
   );
 }
 
-export function ManuallyOpenedCreateOrganizationDialog({
+export function ManuallyOpenedInviteDialog({
   children,
+  orgId,
   isOpen,
   onOpenChange,
 }: {
   children?: React.ReactNode;
+  orgId: number;
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
 }) {
   const [isCreating, setIsCreating] = useState(false);
   const [createError, setCreateError] = useState<string | null>(null);
   const [formData, setFormData] = useState({
-    name: "",
-    description: "",
+    email: "",
   });
 
-  const handleCreateOrganization = async () => {
-    if (!formData.name.trim()) {
-      setCreateError("Organization name is required");
+  const handleSendInvite = async () => {
+    if (!formData.email.trim()) {
+      setCreateError("Email is required");
       return;
     }
 
@@ -61,10 +65,7 @@ export function ManuallyOpenedCreateOrganizationDialog({
     setCreateError(null);
 
     try {
-      const { error } = await newOrganization({
-        name: formData.name.trim(),
-        description: formData.description.trim() || undefined,
-      });
+      const { error } = await inviteToOrganization(orgId, formData.email);
 
       if (error) {
         setCreateError(error);
@@ -72,7 +73,7 @@ export function ManuallyOpenedCreateOrganizationDialog({
       }
 
       onOpenChange(false);
-      setFormData({ name: "", description: "" });
+      setFormData({ email: "" });
     } finally {
       setIsCreating(false);
     }
@@ -81,7 +82,7 @@ export function ManuallyOpenedCreateOrganizationDialog({
   const handleDialogClose = () => {
     onOpenChange(false);
     setCreateError(null);
-    setFormData({ name: "", description: "" });
+    setFormData({ email: "" });
   };
 
   return (
@@ -89,39 +90,23 @@ export function ManuallyOpenedCreateOrganizationDialog({
       {children && <DialogTrigger asChild>{children}</DialogTrigger>}
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Create New Organization</DialogTitle>
+          <DialogTitle>Send an Invite</DialogTitle>
           <DialogDescription>
-            Create a new organization to collaborate with your team. You&apos;ll
-            be the admin of this organization.
+            Invite a user to join your organization by entering their email
+            address. They must already have an account to accept the invitation.
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
           <div className="grid gap-2">
-            <Label htmlFor="name">Organization Name *</Label>
+            <Label htmlFor="email">Email Address</Label>
             <Input
-              id="name"
-              placeholder="Enter organization name"
-              value={formData.name}
+              id="email"
+              placeholder="Enter email address to invite"
+              value={formData.email}
               onChange={(e) =>
-                setFormData((prev) => ({ ...prev, name: e.target.value }))
+                setFormData((prev) => ({ ...prev, email: e.target.value }))
               }
               disabled={isCreating}
-            />
-          </div>
-          <div className="grid gap-2">
-            <Label htmlFor="description">Description</Label>
-            <Textarea
-              id="description"
-              placeholder="Enter organization description (optional)"
-              value={formData.description}
-              onChange={(e) =>
-                setFormData((prev) => ({
-                  ...prev,
-                  description: e.target.value,
-                }))
-              }
-              disabled={isCreating}
-              rows={3}
             />
           </div>
           {createError && (
@@ -139,8 +124,8 @@ export function ManuallyOpenedCreateOrganizationDialog({
           >
             Cancel
           </Button>
-          <Button onClick={handleCreateOrganization} disabled={isCreating}>
-            {isCreating ? "Creating..." : "Create Organization"}
+          <Button onClick={handleSendInvite} disabled={isCreating}>
+            {isCreating ? "Sending..." : "Send Invite"}
           </Button>
         </DialogFooter>
       </DialogContent>

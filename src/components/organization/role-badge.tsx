@@ -1,6 +1,7 @@
-import { Crown, Shield, User } from "lucide-react";
+import { Crown, User } from "lucide-react";
 import { Badge } from "../ui/badge";
 import type { OrganizationMemberRole } from "~/server/db/types";
+import { cn } from "~/lib/utils";
 
 const getRoleColor = (role: string) => {
   switch (role.toLowerCase()) {
@@ -22,10 +23,10 @@ const getRoleIcon = (role: string) => {
   }
 };
 
-export function RoleBadge({ role }: { role: OrganizationMemberRole }) {
+export function RoleBadge({ role, className }: { role: OrganizationMemberRole, className?: string }) {
   const capitalizedRole = role.charAt(0).toUpperCase() + role.slice(1).toLowerCase();
   return (
-    <Badge className={getRoleColor(role)}>
+    <Badge className={cn(getRoleColor(role), className)}>
       <div className="flex items-center gap-1">
         {getRoleIcon(role)}
         {capitalizedRole}

@@ -4,8 +4,10 @@ import { failure, success, type Result } from "~/lib/try-catch";
 import {
   addOrganizationMember,
   createOrganization,
+  createOrganizationInvite,
   getOrganizationById,
   getOrganizationInviteById,
+  getOrganizationInvitesForOrganization,
   getOrganizationInvitesForUser,
   getUserOrganizationMemberships,
   getUserRoleInOrganization,
@@ -13,13 +15,15 @@ import {
 } from "./db/organization";
 import type {
   Organization,
-  OrganizationInvite,
+  UserInvite,
   OrganizationMemberRole,
   OrganizationMembership,
+  AdminInvite,
 } from "./db/types";
 import { getUserId } from "./auth";
 import { findUserByEmail } from "./db/user";
 import { revalidatePath } from "next/cache";
+import { cache } from "react";
 
 async function getAuthOrganization(
   organizationId: number,
@@ -101,6 +105,30 @@ export async function newOrganization(orgInfo: {
 }
 
 /**
+ * Get invites for an organization
+ *
+ * @param orgId - The ID of the organization
+ * @returns Result with array of invites on success, error message on failure
+ */
+export async function fetchOrganizationInvites(
+  orgId: number,
+): Promise<Result<AdminInvite[], string>> {
+  const { data: auth, error: authError } = await getAuthOrganization(orgId);
+
+  if (authError || !auth) {
+    return failure(authError);
+  }
+
+  if (!auth.role) {
+    return failure(
+      "User must be a part of the organization to view organization invites",
+    );
+  }
+
+  return await getOrganizationInvitesForOrganization(orgId);
+}
+
+/**
  * Adds a user to an organization as a member
  *
  * @param orgId - The ID of the organization
@@ -111,7 +139,18 @@ export async function inviteToOrganization(
   orgId: number,
   email: string,
 ): Promise<Result<void, string>> {
-  if (!(await isAdmin(orgId))) {
+  // if (!(await isAdmin(orgId))) {
+  //   return failure(
+  //     "User must be an admin to invite members to the organization",
+  //   );
+  // }
+  const { data: auth, error: authError } = await getAuthOrganization(orgId);
+
+  if (authError || !auth) {
+    return failure(authError);
+  }
+
+  if (auth.role !== "admin") {
     return failure(
       "User must be an admin to invite members to the organization",
     );
@@ -128,7 +167,11 @@ export async function inviteToOrganization(
   }
 
   const userId = user.data.id;
-  const addMemberResult = await addOrganizationMember(orgId, { userId });
+  const addMemberResult = await createOrganizationInvite(
+    orgId,
+    auth.userId,
+    userId,
+  );
 
   if (addMemberResult.error) {
     return failure(addMemberResult.error);
@@ -305,8 +348,8 @@ export async function respondToOrganizationInvite(
  *
  * @returns Result with array of invites on success, error message on failure
  */
-export async function fetchMyOrganizationInvites(): Promise<
-  Result<OrganizationInvite[], string>
+export const fetchMyOrganizationInvites = cache(async function (): Promise<
+  Result<UserInvite[], string>
 > {
   const userId = await getUserId();
   if (!userId) {
@@ -314,14 +357,14 @@ export async function fetchMyOrganizationInvites(): Promise<
   }
 
   return await getOrganizationInvitesForUser(userId);
-}
+});
 
 /**
  * Fetches all organization memberships for the authenticated user
  *
  * @returns Result with array of memberships on success, error message on failure
  */
-export async function fetchMyOrganizationMemberships(): Promise<
+export const fetchMyOrganizationMemberships = cache(async function (): Promise<
   Result<OrganizationMembership[], string>
 > {
   const userId = await getUserId();
@@ -330,16 +373,16 @@ export async function fetchMyOrganizationMemberships(): Promise<
   }
 
   return await getUserOrganizationMemberships(userId);
-}
+});
 
 /**
  * Fetches a specific organization for the authenticated user
- * 
+ *
  * @returns Result with organization on success, error message on failure
  */
-export async function fetchOrganizationById(orgId: number): Promise<
-  Result<Organization | null, string>
-> {
+export const fetchOrganizationById = cache(async function (
+  orgId: number,
+): Promise<Result<Organization | null, string>> {
   const userId = await getUserId();
   if (!userId) {
     return failure("User must be logged in to view organizations");
@@ -362,4 +405,4 @@ export async function fetchOrganizationById(orgId: number): Promise<
   }
 
   return failure("User is not a member of this organization");
-}
+});

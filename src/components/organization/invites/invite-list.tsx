@@ -1,4 +1,4 @@
-import { Building2, Badge, User, Calendar, Inbox } from "lucide-react";
+import { Building2, User, Calendar, Inbox } from "lucide-react";
 import { Avatar, AvatarFallback } from "~/components/ui/avatar";
 import {
   Card,
@@ -7,11 +7,12 @@ import {
   CardDescription,
   CardContent,
 } from "~/components/ui/card";
-import type { OrganizationInvite } from "~/server/db/types";
+import type { UserInvite } from "~/server/db/types";
 import InviteActions from "./invite-actions";
 import { formatDate } from "~/lib/utils";
+import { Badge } from "~/components/ui/badge";
 
-function getStateColor(state: string) {
+export function getStateColor(state: string) {
   switch (state) {
     case "accepted":
       return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200";
@@ -24,11 +25,7 @@ function getStateColor(state: string) {
   }
 }
 
-export default function InviteList({
-  invites,
-}: {
-  invites: OrganizationInvite[];
-}) {
+export default function InviteList({ invites }: { invites: UserInvite[] }) {
   if (invites.length === 0) {
     return (
       <Card className="w-full">
@@ -50,7 +47,7 @@ export default function InviteList({
   ));
 }
 
-function InviteCard({ invite }: { invite: OrganizationInvite }) {
+function InviteCard({ invite }: { invite: UserInvite }) {
   return (
     <Card key={invite.id} className="w-full">
       <CardHeader>
