@@ -84,10 +84,4 @@ export const organizationInvites = createTable(
       .references(() => users.id, { onDelete: "cascade" }),
     invitedAt: timestamp("invited_at").defaultNow(),
   },
-  (table) => [
-    uniqueIndex("organization_invite_unique_index").on(
-      table.organizationId,
-      table.userId,
-    ),
-  ],
 );

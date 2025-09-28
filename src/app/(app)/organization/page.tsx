@@ -1,7 +1,12 @@
+import { Plus } from "lucide-react";
 import { Suspense } from "react";
 import InviteList from "~/components/organization/invites/invite-list";
 import { CreateOrganizationButton } from "~/components/organization/organization-create";
-import { LoadingCard, OrganizationList } from "~/components/organization/organization-list";
+import {
+  LoadingCard,
+  OrganizationList,
+} from "~/components/organization/organization-list";
+import { Button } from "~/components/ui/button";
 import {
   fetchMyOrganizationInvites,
   fetchMyOrganizationMemberships,
@@ -22,10 +27,15 @@ export default async function OrganizationPage() {
             </p>
           </div>
 
-          <CreateOrganizationButton />
+          <CreateOrganizationButton>
+            <Button className="flex items-center gap-2">
+              <Plus className="h-4 w-4" />
+              Create Organization
+            </Button>
+          </CreateOrganizationButton>
         </div>
 
-        <div className="space-y-4">
+        <div className="flex flex-col gap-4">
           <Suspense fallback={<LoadingCard name={"Organizations"} />}>
             <MyOrganizations />
           </Suspense>
@@ -36,12 +46,8 @@ export default async function OrganizationPage() {
           Organization Invites
         </h2>
       </div>
-      <div className="space-y-4">
-        <Suspense
-          fallback={
-            <LoadingCard name="Invites" />
-          }
-        >
+      <div className="flex flex-col gap-4">
+        <Suspense fallback={<LoadingCard name="Invites" />}>
           <MyInvitesList />
         </Suspense>
       </div>

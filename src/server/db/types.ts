@@ -49,12 +49,24 @@ export type Organization = DbOrganization & {
 export type OrganizationInviteState = (typeof inviteState.enumValues)[number];
 
 /**
- * Organization invite type
+ * Organization invite type for user operations
  */
-export type OrganizationInvite = Omit<
+export type UserInvite = Omit<
   typeof organizationInvites.$inferSelect,
   "invitedBy" | "organizationId"
 > & {
   organization: DbOrganization | null;
+  invitedBy: PublicUser | null;
+};
+
+/**
+ * Organization invite type for admin operations
+ * 
+ */
+export type AdminInvite = Omit<
+  typeof organizationInvites.$inferSelect,
+  "invitedBy" | "organizationId" | "userId"
+> & {
+  user: PublicUser | null;
   invitedBy: PublicUser | null;
 };

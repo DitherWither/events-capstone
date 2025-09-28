@@ -5,14 +5,10 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Alert, AlertDescription } from "~/components/ui/alert";
 import { Button } from "~/components/ui/button";
-import type { OrganizationInvite } from "~/server/db/types";
+import type { UserInvite } from "~/server/db/types";
 import { respondToOrganizationInvite } from "~/server/organization";
 
-export default function InviteActions({
-  invite,
-}: {
-  invite: OrganizationInvite;
-}) {
+export default function InviteActions({ invite }: { invite: UserInvite }) {
   const [loadingState, setLoadingState] = useState<
     "idle" | "accepting" | "rejecting"
   >("idle");

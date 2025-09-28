@@ -6,9 +6,16 @@ import {
   users,
 } from "./schema";
 import { db } from ".";
-import { and, count, eq } from "drizzle-orm";
+import { and, count, eq, ne } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
-import type { Organization, OrganizationInvite, OrganizationInviteState, OrganizationMemberRole, OrganizationMembership } from "./types";
+import type {
+  Organization,
+  UserInvite,
+  OrganizationInviteState,
+  OrganizationMemberRole,
+  OrganizationMembership,
+  AdminInvite,
+} from "./types";
 
 /**
  * Creates a new organization in the database
@@ -53,7 +60,7 @@ export async function addOrganizationMember(
   member: OrgMember,
 ): Promise<Result<void, string>> {
   try {
-     await db.insert(organizationMembers).values({
+    await db.insert(organizationMembers).values({
       organizationId: orgId,
       userId: member.userId,
       role: member.role ?? "member",
@@ -109,9 +116,9 @@ export async function createOrganizationInvite(
  */
 export async function getOrganizationInvitesForUser(
   userId: number,
-): Promise<Result<OrganizationInvite[], string>> {
+): Promise<Result<UserInvite[], string>> {
   try {
-    const invites: OrganizationInvite[] = await db
+    const invites: UserInvite[] = await db
       .select({
         id: organizationInvites.id,
         userId: organizationInvites.userId,
@@ -153,6 +160,62 @@ export async function getOrganizationInvitesForUser(
     return failure("Database error during fetching organization invites");
   }
 }
+
+/**
+ * Get invites for an organization
+ *
+ * @param orgId - The ID of the organization
+ * @returns Result with list of invites on success, error message on failure
+ */
+export async function getOrganizationInvitesForOrganization(
+  orgId: number,
+): Promise<Result<AdminInvite[], string>> {
+  try {
+    const invitedUser = alias(users, "invitedUser");
+    const inviteCreator = alias(users, "inviteCreator");
+    const invites: AdminInvite[] = await db
+      .select({
+        id: organizationInvites.id,
+        user: {
+          id: invitedUser.id,
+          name: invitedUser.name,
+          email: invitedUser.email,
+          createdAt: invitedUser.createdAt,
+        },
+        state: organizationInvites.state,
+        invitedAt: organizationInvites.invitedAt,
+        invitedBy: {
+          id: inviteCreator.id,
+          name: inviteCreator.name,
+          email: inviteCreator.email,
+          createdAt: inviteCreator.createdAt,
+        },
+      })
+      .from(organizationInvites)
+      .where(
+        and(
+          eq(organizationInvites.organizationId, orgId),
+          ne(organizationInvites.state, "accepted"),
+        ),
+      )
+      .leftJoin(invitedUser, eq(organizationInvites.userId, invitedUser.id))
+      .leftJoin(
+        inviteCreator,
+        eq(organizationInvites.invitedBy, inviteCreator.id),
+      );
+
+    return success(invites);
+  } catch (error) {
+    console.error(
+      "Database error during fetching organization invites for organization:",
+      error,
+    );
+    return failure(
+      "Database error during fetching organization invites for organization",
+    );
+  }
+}
+
 /**
  * Set the state of an organization invite
  *
@@ -233,7 +296,7 @@ export async function getUserRoleInOrganization(
  */
 export async function getOrganizationInviteById(
   inviteId: number,
-): Promise<Result<OrganizationInvite | null, string>> {
+): Promise<Result<UserInvite | null, string>> {
   try {
     const [invite] = await db
       .select({
@@ -296,7 +359,7 @@ export async function getOrganizationById(
           name: users.name,
           email: users.email,
           createdAt: users.createdAt,
-        }
+        },
       })
       .from(organizations)
       .where(eq(organizations.id, orgId))
@@ -327,8 +390,7 @@ export async function getOrganizationById(
     };
 
     return success(organization);
-  }
-  catch (error) {
+  } catch (error) {
     console.error("Database error during fetching organization by ID:", error);
     return failure("Database error during fetching organization by ID");
   }
@@ -359,15 +421,24 @@ export async function getUserOrganizationMemberships(
           description: organizations.description,
           createdAt: organizations.createdAt,
           memberCount: count(otherMembers.userId),
-        }
+        },
       })
       .from(organizationMembers)
       .where(eq(organizationMembers.userId, userId))
-      .leftJoin(organizations, eq(organizationMembers.organizationId, organizations.id))
+      .leftJoin(
+        organizations,
+        eq(organizationMembers.organizationId, organizations.id),
+      )
       .leftJoin(otherMembers, eq(otherMembers.organizationId, organizations.id))
-      .groupBy(organizationMembers.userId, organizationMembers.organizationId, organizations.id);
-    
-      const membershipsWithOrgs = memberships.filter(m => m.organization !== null) as OrganizationMembership[];
+      .groupBy(
+        organizationMembers.userId,
+        organizationMembers.organizationId,
+        organizations.id,
+      );
+
+    const membershipsWithOrgs = memberships.filter(
+      (m) => m.organization !== null,
+    ) as OrganizationMembership[];
 
     return success(membershipsWithOrgs);
   } catch (error) {
