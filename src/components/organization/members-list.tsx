@@ -1,14 +1,20 @@
 import type { OrganizationMember } from "~/server/db/types";
 import { Card, CardContent } from "../ui/card";
 import { Avatar, AvatarFallback } from "../ui/avatar";
-import { Mail, Calendar } from "lucide-react";
+import { Mail, Calendar, UserRoundX } from "lucide-react";
 import { getInitials, formatDate } from "~/lib/utils";
 import { RoleBadge } from "./role-badge";
+import { OrganizationKickButton } from "./organization-kick-button";
+import { Button } from "../ui/button";
 
 export function OrganizationMembersList({
   members,
+  organizationId,
+  currentUser,
 }: {
   members: Omit<OrganizationMember, "organization">[];
+  organizationId: number;
+  currentUser: Omit<OrganizationMember, "organization">;
 }) {
   return (
     <div className="grid gap-4">
@@ -35,11 +41,26 @@ export function OrganizationMembersList({
                     </div>
                   </div>
                 </div>
-                <div className="text-muted-foreground text-right text-sm">
+                <div className="text-muted-foreground flex gap-4 text-right text-sm">
                   <div className="flex items-center gap-2">
                     <Calendar className="h-4 w-4" />
                     <span>Joined: {formatDate(member.joinedAt)}</span>
                   </div>
+                  <OrganizationKickButton
+                    member={member.user!}
+                    orgId={organizationId}
+                  >
+                    {currentUser.role === "admin" && (
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        disabled={member.role === "admin"}
+                      >
+                        <UserRoundX className="h-4 w-4" />
+                        Kick
+                      </Button>
+                    )}
+                  </OrganizationKickButton>
                 </div>
               </div>
             </CardContent>

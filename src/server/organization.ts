@@ -11,6 +11,7 @@ import {
   getOrganizationInvitesForUser,
   getUserOrganizationMemberships,
   getUserRoleInOrganization,
+  removeOrganizationMember,
   setOrganizationInviteState,
 } from "./db/organization";
 import type {
@@ -25,7 +26,7 @@ import { findUserByEmail } from "./db/user";
 import { revalidatePath } from "next/cache";
 import { cache } from "react";
 
-async function getAuthOrganization(
+export async function getAuthOrganization(
   organizationId: number,
 ): Promise<
   Result<{ role: OrganizationMemberRole | null; userId: number }, string>
@@ -177,6 +178,77 @@ export async function inviteToOrganization(
     return failure(addMemberResult.error);
   }
 
+  revalidatePath("/organization");
+
+  return success(void 0);
+}
+
+/**
+ * Kicks a member from the organization
+ *
+ * @param orgId - The ID of the organization
+ * @param memberId - The ID of the member to kick
+ * @returns Result with void on success, error message on failure
+ */
+export async function kickMemberFromOrganization(
+  orgId: number,
+  memberId: number,
+): Promise<Result<void, string>> {
+  const { data: auth, error: authError } = await getAuthOrganization(orgId);
+
+  if (authError || !auth) {
+    return failure(authError);
+  }
+
+  if (auth.role !== "admin") {
+    return failure(
+      "User must be an admin to kick members from the organization",
+    );
+  }
+
+  if (auth.userId === memberId) {
+    return failure("Admins cannot kick themselves from the organization");
+  }
+
+  const { error } = await removeOrganizationMember(orgId, memberId);
+
+  if (error) {
+    return failure(error);
+  }
+
+  revalidatePath("/organization");
+
+  return success(void 0);
+}
+
+/**
+ * Leave the organization
+ *
+ * @param orgId - The ID of the organization
+ * @returns Result with void on success, error message on failure
+ */
+export async function leaveOrganization(
+  orgId: number,
+): Promise<Result<void, string>> {
+  const { data: auth, error: authError } = await getAuthOrganization(orgId);
+
+  if (authError || !auth) {
+    return failure(authError);
+  }
+
+  if (!auth.role) {
+    return failure("User must be a member of the organization to leave it");
+  }
+
+  if (auth.role === "admin") {
+    return failure("Admins cannot leave the organization.");
+  }
+
+  const { error } = await removeOrganizationMember(orgId, auth.userId);
+
+  if (error) {
+    return failure(error);
+  }
   revalidatePath("/organization");
 
   return success(void 0);
