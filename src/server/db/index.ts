@@ -3,6 +3,7 @@ import postgres from "postgres";
 
 import { env } from "~/env";
 import * as schema from "./schema";
+import type { PgTransaction } from "drizzle-orm/pg-core";
 
 /**
  * Cache the database connection in development. This avoids creating a new connection on every HMR
@@ -16,3 +17,8 @@ const conn = globalForDb.conn ?? postgres(env.DATABASE_URL);
 if (env.NODE_ENV !== "production") globalForDb.conn = conn;
 
 export const db = drizzle(conn, { schema });
+
+export type TransactionType = Parameters<
+  Parameters<DatabaseType["transaction"]>[0]
+>[0];
+export type DatabaseType = typeof db;
