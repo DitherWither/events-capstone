@@ -5,6 +5,14 @@
 import "./src/env.js";
 
 /** @type {import("next").NextConfig} */
-const config = {};
+const config = {
+  webpack: (config, { isServer }) => {
+    if (!isServer) {
+      config.externals = config.externals || [];
+      config.externals.push('argon2');
+    }
+    return config;
+  },
+};
 
 export default config;
