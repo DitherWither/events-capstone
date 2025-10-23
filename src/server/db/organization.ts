@@ -89,7 +89,7 @@ export async function removeOrganizationMember(
   userId: number,
 ): Promise<Result<void, string>> {
   try {
-    const result = await db
+    await db
       .delete(organizationMembers)
       .where(
         and(

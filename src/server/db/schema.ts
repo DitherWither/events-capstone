@@ -68,20 +68,17 @@ export const inviteState = pgEnum("organization_invite_state", [
   "declined",
 ]);
 
-export const organizationInvites = createTable(
-  "organization_invites",
-  {
-    id: serial("id").primaryKey(),
-    organizationId: serial("organization_id")
-      .notNull()
-      .references(() => organizations.id, { onDelete: "cascade" }),
-    userId: serial("user_id")
-      .notNull()
-      .references(() => users.id, { onDelete: "cascade" }),
-    state: text("state").notNull().default("pending"),
-    invitedBy: serial("invited_by")
-      .notNull()
-      .references(() => users.id, { onDelete: "cascade" }),
-    invitedAt: timestamp("invited_at").defaultNow(),
-  },
-);
+export const organizationInvites = createTable("organization_invites", {
+  id: serial("id").primaryKey(),
+  organizationId: serial("organization_id")
+    .notNull()
+    .references(() => organizations.id, { onDelete: "cascade" }),
+  userId: serial("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  state: text("state").notNull().default("pending"),
+  invitedBy: serial("invited_by")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  invitedAt: timestamp("invited_at").defaultNow(),
+});
