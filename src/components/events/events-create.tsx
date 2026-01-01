@@ -16,30 +16,36 @@ import {
 } from "../ui/dialog";
 import { Label } from "../ui/label";
 import { Textarea } from "../ui/textarea";
-import { newOrganization } from "~/server/organization";
+import { newEvent } from "~/server/events";
 
-export function CreateOrganizationButton({
+export function CreateEventButton({
+  organizationId,
   children,
 }: {
+  organizationId: number;
   children?: React.ReactNode;
 }) {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
 
   return (
-    <ManuallyOpenedCreateOrganizationDialog
+    <ManuallyOpenedCreateEventDialog
+      organizationId={organizationId}
       isOpen={isCreateDialogOpen}
       onOpenChange={setIsCreateDialogOpen}
     >
       {children}
-    </ManuallyOpenedCreateOrganizationDialog>
+    </ManuallyOpenedCreateEventDialog>
   );
 }
 
-export function ManuallyOpenedCreateOrganizationDialog({
+// TODO: better page based UI for this
+export function ManuallyOpenedCreateEventDialog({
+  organizationId,
   children,
   isOpen,
   onOpenChange,
 }: {
+  organizationId: number;
   children?: React.ReactNode;
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
@@ -47,13 +53,14 @@ export function ManuallyOpenedCreateOrganizationDialog({
   const [isCreating, setIsCreating] = useState(false);
   const [createError, setCreateError] = useState<string | null>(null);
   const [formData, setFormData] = useState({
-    name: "",
+    title: "",
     description: "",
+    body: "",
   });
 
   const handleCreateOrganization = async () => {
-    if (!formData.name.trim()) {
-      setCreateError("Organization name is required");
+    if (!formData.title.trim()) {
+      setCreateError("Event title is required");
       return;
     }
 
@@ -61,9 +68,11 @@ export function ManuallyOpenedCreateOrganizationDialog({
     setCreateError(null);
 
     try {
-      const { error } = await newOrganization({
-        name: formData.name.trim(),
+      const { error } = await newEvent({
+        organizationId,
+        title: formData.title.trim(),
         description: formData.description.trim() || undefined,
+        body: formData.body.trim() || undefined,
       });
 
       if (error) {
@@ -72,7 +81,7 @@ export function ManuallyOpenedCreateOrganizationDialog({
       }
 
       onOpenChange(false);
-      setFormData({ name: "", description: "" });
+      setFormData({ title: "", description: "", body: "" });
     } finally {
       setIsCreating(false);
     }
@@ -81,7 +90,7 @@ export function ManuallyOpenedCreateOrganizationDialog({
   const handleDialogClose = () => {
     onOpenChange(false);
     setCreateError(null);
-    setFormData({ name: "", description: "" });
+    setFormData({ title: "", description: "", body: "" });
   };
 
   return (
@@ -89,21 +98,20 @@ export function ManuallyOpenedCreateOrganizationDialog({
       {children && <DialogTrigger asChild>{children}</DialogTrigger>}
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Create New Organization</DialogTitle>
+          <DialogTitle>Create New Event</DialogTitle>
           <DialogDescription>
-            Create a new organization to collaborate with your team. You&apos;ll
-            be the admin of this organization.
+            Create a new organization to share with the world.
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
           <div className="grid gap-2">
-            <Label htmlFor="name">Organization Name</Label>
+            <Label htmlFor="title">Event Name</Label>
             <Input
-              id="name"
-              placeholder="Enter organization name"
-              value={formData.name}
+              id="title"
+              placeholder="Enter event title"
+              value={formData.title}
               onChange={(e) =>
-                setFormData((prev) => ({ ...prev, name: e.target.value }))
+                setFormData((prev) => ({ ...prev, title: e.target.value }))
               }
               disabled={isCreating}
             />
@@ -112,12 +120,28 @@ export function ManuallyOpenedCreateOrganizationDialog({
             <Label htmlFor="description">Description</Label>
             <Textarea
               id="description"
-              placeholder="Enter organization description (optional)"
+              placeholder="Enter event description"
               value={formData.description}
               onChange={(e) =>
                 setFormData((prev) => ({
                   ...prev,
                   description: e.target.value,
+                }))
+              }
+              disabled={isCreating}
+              rows={3}
+            />
+          </div>
+          <div className="grid gap-2">
+            <Label htmlFor="body">Event Body</Label>
+            <Textarea
+              id="body"
+              placeholder="Enter event body"
+              value={formData.body}
+              onChange={(e) =>
+                setFormData((prev) => ({
+                  ...prev,
+                  body: e.target.value,
                 }))
               }
               disabled={isCreating}
@@ -140,7 +164,7 @@ export function ManuallyOpenedCreateOrganizationDialog({
             Cancel
           </Button>
           <Button onClick={handleCreateOrganization} disabled={isCreating}>
-            {isCreating ? "Creating..." : "Create Organization"}
+            {isCreating ? "Creating..." : "Create Event"}
           </Button>
         </DialogFooter>
       </DialogContent>

@@ -1,4 +1,5 @@
 import type {
+  events,
   inviteState,
   organizationInvites,
   organizationMembers,
@@ -61,7 +62,7 @@ export type UserInvite = Omit<
 
 /**
  * Organization invite type for admin operations
- * 
+ *
  */
 export type AdminInvite = Omit<
   typeof organizationInvites.$inferSelect,
@@ -69,4 +70,13 @@ export type AdminInvite = Omit<
 > & {
   user: PublicUser | null;
   invitedBy: PublicUser | null;
+};
+
+export type DbEvent = typeof events.$inferSelect;
+
+export type CreateEvent = {
+  organizationId: number;
+  title: string;
+  description?: string;
+  body?: string;
 };

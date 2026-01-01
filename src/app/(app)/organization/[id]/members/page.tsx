@@ -74,7 +74,11 @@ async function MyMembersList({ id }: { id: number }) {
           </InviteButton>
         )}
       </div>
-      <OrganizationMembersList members={organization.members} organizationId={id} currentUser={currentMember}/>
+      <OrganizationMembersList
+        members={organization.members}
+        organizationId={id}
+        currentUser={currentMember}
+      />
     </>
   );
 }
