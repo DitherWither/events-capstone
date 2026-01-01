@@ -9,7 +9,6 @@ import {
   serial,
   text,
   timestamp,
-  uniqueIndex,
 } from "drizzle-orm/pg-core";
 
 /**
@@ -81,4 +80,19 @@ export const organizationInvites = createTable("organization_invites", {
     .notNull()
     .references(() => users.id, { onDelete: "cascade" }),
   invitedAt: timestamp("invited_at").defaultNow(),
+});
+
+// TODO: tsvector based search index for title body and description
+
+export const events = createTable("events", {
+  id: serial("id").primaryKey(),
+  organizationId: serial("organization_id")
+    .notNull()
+    .references(() => organizations.id, { onDelete: "cascade" }),
+
+  title: text("title").notNull(),
+  description: text("description"),
+  body: text("body"),
+
+  createdAt: timestamp("created_at").defaultNow(),
 });
