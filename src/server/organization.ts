@@ -26,6 +26,7 @@ import { findUserByEmail } from "./db/user";
 import { revalidatePath } from "next/cache";
 import { cache } from "react";
 import { db } from "./db";
+import { addLog, getLogsForOrganization } from "./db/audit-logs";
 
 export async function getAuthOrganization(
   organizationId: number,
@@ -194,6 +195,13 @@ export async function inviteToOrganization(
     return failure(addMemberResult.error);
   }
 
+  void addLog({
+    organizationId: orgId,
+    userId: auth.userId,
+    action: "invite_create",
+    params: { email },
+  });
+
   revalidatePath("/organization");
 
   return success(void 0);
@@ -232,6 +240,12 @@ export async function kickMemberFromOrganization(
     return failure(error);
   }
 
+  void addLog({
+    organizationId: orgId,
+    userId: auth.userId,
+    action: "user_kick",
+    params: { memberId },
+  });
   revalidatePath("/organization");
 
   return success(void 0);
@@ -265,6 +279,12 @@ export async function leaveOrganization(
   if (error) {
     return failure(error);
   }
+  void addLog({
+    organizationId: orgId,
+    userId: auth.userId,
+    action: "organization_leave",
+    params: {},
+  });
   revalidatePath("/organization");
 
   return success(void 0);
@@ -350,6 +370,12 @@ export async function cancelOrganizationInvite(
 
   // Now we can cancel the invite
   const res = await cancelOrganizationInvite(inviteId);
+  void addLog({
+    organizationId: invite.organization.id,
+    userId: userId,
+    action: "invite_cancel",
+    params: { inviteId },
+  });
   revalidatePath("/organization");
   return res;
 }
@@ -426,6 +452,12 @@ export async function respondToOrganizationInvite(
     inviteId,
     accept ? "accepted" : "declined",
   );
+  void addLog({
+    organizationId: invite.organization.id,
+    userId: userId,
+    action: "invite_respond",
+    params: { inviteId, accept },
+  });
 
   revalidatePath("/organization");
   return res;
@@ -494,3 +526,21 @@ export const fetchOrganizationById = cache(async function (
 
   return failure("User is not a member of this organization");
 });
+
+export const fetchOrganizationAuditLogs = async function (
+  orgId: number,
+  page?: number,
+) {
+  const { data: auth, error: authError } = await getAuthOrganization(orgId);
+
+  if (authError) {
+    return failure(authError);
+  }
+  if (!auth?.role) {
+    return failure(
+      "You must be a member of the organization to view audit logs",
+    );
+  }
+
+  return await getLogsForOrganization(orgId, page ?? 0);
+};

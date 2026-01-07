@@ -1,4 +1,4 @@
-import { Building2, Calendar1, User } from "lucide-react";
+import { Building2, Calendar1, Logs, User } from "lucide-react";
 import Link from "next/link";
 import { OrganizationSwitcher } from "~/components/organization/organization-switcher";
 import {
@@ -62,6 +62,14 @@ export default async function OrganizationLayout({
                     <Link href={`/organization/${id}/events`}>
                       <Calendar1 />
                       <span>Events</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild>
+                    <Link href={`/organization/${id}/audit-logs`}>
+                      <Logs />
+                      <span>Audit Logs</span>
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>

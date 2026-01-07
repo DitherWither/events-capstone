@@ -4,6 +4,7 @@
 import {
   boolean,
   index,
+  jsonb,
   pgEnum,
   pgTableCreator,
   primaryKey,
@@ -97,6 +98,20 @@ export const events = createTable("events", {
   body: text("body"),
 
   published: boolean("published").notNull().default(false),
+
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const auditLogs = createTable("audit_logs", {
+  id: serial("id").primaryKey(),
+  organizationId: serial("organization_id")
+    .notNull()
+    .references(() => organizations.id, { onDelete: "cascade" }),
+
+  userId: serial("user_id").notNull(), // We do not reference the user, we want the log to stay if after the user account gets deleted
+
+  action: text("action").notNull(),
+  params: jsonb("params").notNull(),
 
   createdAt: timestamp("created_at").defaultNow(),
 });

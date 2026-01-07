@@ -12,6 +12,7 @@ import {
 import type { CreateEvent, UpdateEvent } from "./db/types";
 import { getAuthOrganization } from "./organization";
 import { revalidatePath } from "next/cache";
+import { addLog } from "./db/audit-logs";
 
 // Currently just wrappers, as we don't have any filtering or recommendations
 
@@ -41,6 +42,14 @@ export async function newEvent(event: CreateEvent) {
 
   const res = await createEvent(event);
   revalidatePath(`/organization/${event.organizationId}/events`);
+  if (res.data) {
+    void addLog({
+      organizationId: event.organizationId,
+      userId: auth.userId,
+      action: "event_create",
+      params: { event, eventId: res.data },
+    });
+  }
   return res;
 }
 
@@ -67,6 +76,14 @@ export async function updateEventAction(eventId: number, event: UpdateEvent) {
 
   // TODO: validate input
   const res = await updateEvent(currentEvent.organizationId, eventId, event);
+  if (res.data) {
+    void addLog({
+      organizationId: currentEvent.organizationId,
+      userId: auth.userId,
+      action: "event_update",
+      params: { eventId, event, pastEvent: currentEvent },
+    });
+  }
 
   revalidatePath("/");
   return res;
@@ -95,6 +112,14 @@ export async function deleteEventAction(eventId: number) {
 
   // TODO: validate input
   const res = await deleteEvent(currentEvent.organizationId, eventId);
+  if (!res.error) {
+    void addLog({
+      organizationId: currentEvent.organizationId,
+      userId: auth.userId,
+      action: "event_delete",
+      params: { eventId, deletedEvent: currentEvent },
+    });
+  }
 
   revalidatePath("/");
   return res;
