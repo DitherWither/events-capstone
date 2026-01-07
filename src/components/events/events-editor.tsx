@@ -9,8 +9,15 @@ import { AlertCircle } from "lucide-react";
 import { Alert, AlertDescription } from "../ui/alert";
 import { deleteEventAction, updateEventAction } from "~/server/events";
 import { useRouter } from "next/navigation";
+import { Checkbox } from "../ui/checkbox";
 
-export function EventsEditor({ event }: { event: DbEvent }) {
+export function EventsEditor({
+  event,
+  isAdmin,
+}: {
+  event: DbEvent;
+  isAdmin: boolean;
+}) {
   const router = useRouter();
   const [formData, setFormData] = useState({
     title: event.title ?? "",
@@ -109,6 +116,18 @@ export function EventsEditor({ event }: { event: DbEvent }) {
             rows={3}
           />
         </div>
+        {isAdmin && (
+          <div className="flex gap-2">
+            <Checkbox
+              id="published"
+              checked={formData.published}
+              onCheckedChange={(e) =>
+                setFormData((prev) => ({ ...prev, published: e as boolean }))
+              }
+            />
+            <Label htmlFor="published">Event Published</Label>
+          </div>
+        )}
         {saveError && (
           <Alert variant="destructive">
             <AlertCircle className="h-4 w-4" />

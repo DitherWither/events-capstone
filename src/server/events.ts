@@ -61,12 +61,8 @@ export async function updateEventAction(eventId: number, event: UpdateEvent) {
     return failure(authError);
   }
 
-  if (
-    event.published == true &&
-    currentEvent.published == false &&
-    auth.role != "admin"
-  ) {
-    return failure("You must be an admin to publish an event");
+  if (event.published == currentEvent.published && auth.role != "admin") {
+    return failure("You must be an admin to change publish status of an event");
   }
 
   // TODO: validate input
