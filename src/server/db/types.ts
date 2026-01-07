@@ -80,3 +80,10 @@ export type CreateEvent = {
   description?: string;
   body?: string;
 };
+
+export type UpdateEvent = {
+  title?: string;
+  description?: string;
+  body?: string;
+  published?: boolean;
+};
