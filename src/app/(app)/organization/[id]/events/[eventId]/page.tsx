@@ -1,7 +1,9 @@
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { EventsEditor } from "~/components/events/events-editor";
+import { getUserId } from "~/server/auth";
 import { getEventByIdAction } from "~/server/events";
+import { fetchOrganizationById } from "~/server/organization";
 
 export default async function OrganizationEventsPage({
   params,
@@ -29,10 +31,45 @@ export default async function OrganizationEventsPage({
 }
 
 async function MyEventEditor({ id }: { id: number }) {
+  // TODO make this concurrent
+  const userId = await getUserId();
+  if (!userId) {
+    notFound();
+  }
+
   const { data: event, error } = await getEventByIdAction(id);
-  if (error || !event) {
+  if (error) {
+    return <div className="text-red-500">Error: {error}</div>;
+  }
+  if (!event) {
+    notFound();
+  }
+
+  // TODO: Code to check role copied as-is from /organizations/[id]/members page, we should really refactor
+  // To make this its own route or something
+
+  const { data: organization, error: orgError } = await fetchOrganizationById(
+    event.organizationId,
+  );
+
+  if (orgError) {
     return <div className="text-red-500">Error: {error}</div>;
   }
 
-  return <EventsEditor event={event} />;
+  if (!organization) {
+    notFound();
+  }
+
+  // Asserting not-null because the fetchOrganizationById function
+  // already checks that the user is a member of the organization
+  // before returning it.
+  //
+  // If this assertion fails, something is very wrong.
+  const currentMember = organization.members.find(
+    (m) => m.user?.id === userId,
+  )!;
+
+  const isAdmin = currentMember.role === "admin";
+
+  return <EventsEditor event={event} isAdmin={isAdmin} />;
 }
