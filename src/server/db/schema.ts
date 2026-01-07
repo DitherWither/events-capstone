@@ -2,6 +2,7 @@
 // https://orm.drizzle.team/docs/sql-schema-declaration
 
 import {
+  boolean,
   index,
   pgEnum,
   pgTableCreator,
@@ -86,6 +87,7 @@ export const organizationInvites = createTable("organization_invites", {
 
 export const events = createTable("events", {
   id: serial("id").primaryKey(),
+
   organizationId: serial("organization_id")
     .notNull()
     .references(() => organizations.id, { onDelete: "cascade" }),
@@ -93,6 +95,8 @@ export const events = createTable("events", {
   title: text("title").notNull(),
   description: text("description"),
   body: text("body"),
+
+  published: boolean("published").notNull().default(false),
 
   createdAt: timestamp("created_at").defaultNow(),
 });
