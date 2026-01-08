@@ -1,4 +1,5 @@
-import { Plus } from "lucide-react";
+import { ArrowLeft, Plus } from "lucide-react";
+import Link from "next/link";
 import { Suspense } from "react";
 import InviteList from "~/components/organization/invites/invite-list";
 import { CreateOrganizationButton } from "~/components/organization/organization-create";
@@ -16,6 +17,12 @@ export default async function OrganizationPage() {
   return (
     <div className="container mx-auto max-w-4xl px-4 py-8">
       <div className="py-8">
+        <Link
+          href="/"
+          className="text-muted-foreground flex gap-2 p-2 py-3 hover:underline"
+        >
+          <ArrowLeft /> Back to Home
+        </Link>
         <div className="mb-12 flex items-center justify-between">
           <div>
             <h1 className="text-foreground mb-2 text-3xl font-bold">

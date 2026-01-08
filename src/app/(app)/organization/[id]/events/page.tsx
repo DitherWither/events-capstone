@@ -2,7 +2,7 @@ import { Plus } from "lucide-react";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { CreateEventButton } from "~/components/events/events-create";
-import { EventsList } from "~/components/events/events-list";
+import { OrganizationEventsList } from "~/components/events/events-list";
 import { Button } from "~/components/ui/button";
 import { getEventsForOrganization } from "~/server/events";
 
@@ -40,5 +40,5 @@ async function MyEventsList({ id }: { id: number }) {
     return <div className="text-red-500">Error: {error}</div>;
   }
 
-  return <EventsList events={events} />;
+  return <OrganizationEventsList events={events} />;
 }
