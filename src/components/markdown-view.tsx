@@ -1,16 +1,26 @@
-import { JSDOM } from "jsdom";
-import createDOMPurify, { type WindowLike } from "dompurify";
+"use client";
+import createDOMPurify from "dompurify";
 import { marked } from "marked";
+import { useEffect, useState } from "react";
 
-export async function MarkdownView({ text }: { text: string }) {
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-assignment
-  const mWindow: WindowLike = new JSDOM("").window;
-  const DOMPurify = createDOMPurify(mWindow);
+export function MarkdownView({ text }: { text: string }) {
+  const [renderedHtml, setRenderedHtml] = useState("");
+
+  // TODO: Client render this
+  useEffect(
+    () =>
+      void (async () =>
+        setRenderedHtml(
+          createDOMPurify().sanitize(await marked.parse(text)),
+        ))(),
+    [text],
+  );
+
   return (
     <span
       className="prose dark:prose-invert"
       dangerouslySetInnerHTML={{
-        __html: DOMPurify.sanitize(await marked.parse(text)),
+        __html: renderedHtml,
       }}
     ></span>
   );
