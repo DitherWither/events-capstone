@@ -18,11 +18,7 @@ export default async function OrganizationEventsPage({
   }
 
   return (
-    <div className="container mx-auto max-w-4xl space-y-4 px-4 py-8">
-      <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-semibold">Event Editor</h2>
-      </div>
-
+    <div className="space-y-4">
       <Suspense fallback={<div>Loading...</div>}>
         <MyEventEditor id={eventId} />
       </Suspense>

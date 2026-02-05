@@ -132,22 +132,9 @@ export function ManuallyOpenedCreateEventDialog({
               rows={3}
             />
           </div>
-          <div className="grid gap-2">
-            <Label htmlFor="body">Event Body</Label>
-            <Textarea
-              id="body"
-              placeholder="Enter event body"
-              value={formData.body}
-              onChange={(e) =>
-                setFormData((prev) => ({
-                  ...prev,
-                  body: e.target.value,
-                }))
-              }
-              disabled={isCreating}
-              rows={3}
-            />
-          </div>
+          <p className="text-muted-foreground">
+            You can enter the content for the event once it is created.
+          </p>
           {createError && (
             <Alert variant="destructive">
               <AlertCircle className="h-4 w-4" />
