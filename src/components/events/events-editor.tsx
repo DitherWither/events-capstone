@@ -10,6 +10,7 @@ import { Alert, AlertDescription } from "../ui/alert";
 import { deleteEventAction, updateEventAction } from "~/server/events";
 import { useRouter } from "next/navigation";
 import { Checkbox } from "../ui/checkbox";
+import { SimpleEditor } from "../tiptap-templates/simple/simple-editor";
 
 export function EventsEditor({
   event,
@@ -24,6 +25,14 @@ export function EventsEditor({
     description: event.description ?? "",
     body: event.body ?? "",
     published: event.published,
+    // Temporary hack to make discard text work
+    // This is because currently, calling
+    // setFormData on formData.body does nothing
+    // as it is one way (SimpleEditor -> this component)
+    // and doesn't work the other way around
+    //
+    // TODO: fix this hack
+    bkey: 0,
   });
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
@@ -63,6 +72,7 @@ export function EventsEditor({
         description: data.description ?? "",
         body: data.body ?? "",
         published: data.published,
+        bkey: formData.bkey + 1,
       });
     } finally {
       setIsSaving(false);
@@ -71,24 +81,30 @@ export function EventsEditor({
 
   return (
     <>
-      <div className="grid gap-4 py-4">
-        <div className="grid gap-2">
-          <Label htmlFor="title">Event Name</Label>
-          <Input
+      <div
+        className="grid gap-4 py-4"
+        onKeyDown={(e) => {
+          if (e.key == "s" && (e.ctrlKey || e.metaKey)) {
+            e.preventDefault();
+            handleSave();
+          }
+        }}
+      >
+        <div className="container mx-auto grid max-w-4xl gap-2 py-4">
+          <input
             id="title"
             placeholder="Enter event title"
+            className="text-2xl font-semibold focus:outline-0"
             value={formData.title}
             onChange={(e) =>
               setFormData((prev) => ({ ...prev, title: e.target.value }))
             }
             disabled={isSaving}
           />
-        </div>
-        <div className="grid gap-2">
-          <Label htmlFor="description">Description</Label>
-          <Textarea
+          <textarea
             id="description"
             placeholder="Enter event description"
+            className="text-muted-foreground focus:outline-0"
             value={formData.description}
             onChange={(e) =>
               setFormData((prev) => ({
@@ -99,35 +115,26 @@ export function EventsEditor({
             disabled={isSaving}
             rows={3}
           />
+          {isAdmin && (
+            <div className="flex gap-2">
+              <Checkbox
+                id="published"
+                checked={formData.published}
+                onCheckedChange={(e) =>
+                  setFormData((prev) => ({ ...prev, published: e as boolean }))
+                }
+              />
+              <Label htmlFor="published">Event Published</Label>
+            </div>
+          )}
         </div>
-        <div className="grid gap-2">
-          <Label htmlFor="body">Event Body</Label>
-          <Textarea
-            id="body"
-            placeholder="Enter event body"
-            value={formData.body}
-            onChange={(e) =>
-              setFormData((prev) => ({
-                ...prev,
-                body: e.target.value,
-              }))
-            }
-            disabled={isSaving}
-            rows={3}
-          />
-        </div>
-        {isAdmin && (
-          <div className="flex gap-2">
-            <Checkbox
-              id="published"
-              checked={formData.published}
-              onCheckedChange={(e) =>
-                setFormData((prev) => ({ ...prev, published: e as boolean }))
-              }
-            />
-            <Label htmlFor="published">Event Published</Label>
-          </div>
-        )}
+        <SimpleEditor
+          content={formData.body}
+          setContent={(e) =>
+            setFormData((prev) => ({ ...prev, body: e ?? "" }))
+          }
+          key={formData.bkey}
+        />
         {saveError && (
           <Alert variant="destructive">
             <AlertCircle className="h-4 w-4" />
@@ -159,6 +166,7 @@ export function EventsEditor({
               description: event.description ?? "",
               body: event.body ?? "",
               published: event.published,
+              bkey: prev.bkey + 1,
             }));
           }}
           disabled={isSaving}
