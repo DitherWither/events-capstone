@@ -3,6 +3,7 @@
 
 import {
   boolean,
+  geometry,
   index,
   jsonb,
   pgEnum,
@@ -25,14 +26,30 @@ export const users = createTable("users", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
   email: text("email").notNull().unique(),
+  locationLastKnown: geometry("location_last_known", {
+    type: "point",
+    mode: "xy",
+    srid: 4326,
+  }),
   passwordHash: text("password_hash").notNull(),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
 export const organizations = createTable("organizations", {
   id: serial("id").primaryKey(),
+
   name: text("name").notNull().unique(),
   description: text("description"),
+  location: geometry("location", { type: "point", mode: "xy", srid: 4326 }),
+
+  addressLine1: text("address_line_1"),
+  addressLine2: text("address_line_2"),
+  city: text("city"),
+  state: text("state"),
+  postalCode: text("postal_code"),
+
+  googleMapsLink: text("google_maps_link"),
+
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -99,8 +116,31 @@ export const events = createTable("events", {
 
   published: boolean("published").notNull().default(false),
 
+  registrationLink: text("registration_link"),
+
+  date: timestamp("date"),
+
   createdAt: timestamp("created_at").defaultNow(),
 });
+
+export const eventWatchers = createTable(
+  "event_watchers",
+  {
+    eventId: serial("event_id")
+      .notNull()
+      .references(() => events.id, { onDelete: "cascade" }),
+    userId: serial("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    createdAt: timestamp("created_at").defaultNow(),
+  },
+  (table) => [
+    primaryKey({
+      name: "event_watcher_pkey",
+      columns: [table.eventId, table.userId],
+    }),
+  ],
+);
 
 export const auditLogs = createTable("audit_logs", {
   id: serial("id").primaryKey(),

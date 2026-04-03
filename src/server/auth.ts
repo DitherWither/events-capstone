@@ -9,9 +9,11 @@ import {
   findUserById,
   userExistsByEmail,
   toPublicUser,
+  setUserLocation,
 } from "./db/user";
-import type { PublicUser } from "./db/types";
+import type { PublicUser, User } from "./db/types";
 import { failure, success, type Result } from "~/lib/try-catch";
+import { revalidatePath } from "next/cache";
 
 /**
  * Private helper function to set the userId cookie with consistent configuration.
@@ -174,7 +176,13 @@ export async function register(params: {
  * ```
  */
 export async function getCurrentUser(): Promise<
-  Result<PublicUser | null, string>
+  Result<
+    | (PublicUser & {
+        locationLastKnown: User["locationLastKnown"];
+      })
+    | null,
+    string
+  >
 > {
   const cookieStore = await cookies();
   const userId = cookieStore.get("userId")?.value;
@@ -207,7 +215,10 @@ export async function getCurrentUser(): Promise<
     );
   }
 
-  return success(toPublicUser(userResult.data!));
+  return success({
+    ...toPublicUser(userResult.data!),
+    locationLastKnown: userResult.data!.locationLastKnown,
+  });
 }
 
 /**
@@ -217,6 +228,28 @@ export async function getCurrentUser(): Promise<
  */
 export async function logout(): Promise<Result<void, never>> {
   await setUserIdCookie("");
+  return success(undefined);
+}
+
+export async function updateLocation(location: { x: number; y: number }) {
+  const userResult = await getCurrentUser();
+
+  if (userResult.error) {
+    return failure(userResult.error);
+  }
+
+  if (!userResult.data) {
+    return failure("No user logged in");
+  }
+
+  const updateResult = await setUserLocation(userResult.data.id, location);
+
+  if (updateResult.error) {
+    return failure(updateResult.error);
+  }
+
+  revalidatePath("/"); // Revalidate the root path to update any user data on the client
+
   return success(undefined);
 }
 

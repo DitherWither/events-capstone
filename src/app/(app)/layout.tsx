@@ -2,6 +2,7 @@ import { AlertCircleIcon } from "lucide-react";
 import { redirect } from "next/navigation";
 import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert";
 import { getCurrentUser } from "~/server/auth";
+import { LocationFetcher } from "./location-fetcher";
 
 export default async function AppLayout({
   children,
@@ -26,6 +27,10 @@ export default async function AppLayout({
 
   if (!user) {
     redirect("/login");
+  }
+
+  if (user.locationLastKnown === null) {
+    return <LocationFetcher>{children}</LocationFetcher>;
   }
 
   return children;

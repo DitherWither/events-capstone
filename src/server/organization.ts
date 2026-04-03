@@ -13,6 +13,7 @@ import {
   getUserRoleInOrganization,
   removeOrganizationMember,
   setOrganizationInviteState,
+  updateOrganizationDetails,
 } from "./db/organization";
 import type {
   Organization,
@@ -74,6 +75,7 @@ export async function isAdmin(orgId: number) {
 export async function newOrganization(orgInfo: {
   name: string;
   description?: string;
+  location?: { x: number; y: number };
 }): Promise<Result<number, string>> {
   const userId = await getUserId();
 
@@ -88,6 +90,7 @@ export async function newOrganization(orgInfo: {
         {
           name: orgInfo.name,
           description: orgInfo.description,
+          location: orgInfo.location,
         },
         tx,
       );
@@ -200,6 +203,50 @@ export async function inviteToOrganization(
     userId: auth.userId,
     action: "invite_create",
     params: { email },
+  });
+
+  revalidatePath("/organization");
+
+  return success(void 0);
+}
+
+export async function setOrganizationDetails(
+  orgId: number,
+  details: {
+    name?: string;
+    description?: string;
+    location?: { x: number; y: number };
+    addressLine1?: string;
+    addressLine2?: string;
+    city?: string;
+    state?: string;
+    postalCode?: string;
+    googleMapsLink?: string;
+  },
+): Promise<Result<void, string>> {
+  const { data: auth, error: authError } = await getAuthOrganization(orgId);
+
+  if (authError || !auth) {
+    return failure(authError);
+  }
+
+  if (auth.role !== "admin") {
+    return failure(
+      "User must be an admin to invite members to the organization",
+    );
+  }
+
+  const { error } = await updateOrganizationDetails(orgId, details);
+
+  if (error) {
+    return failure(error);
+  }
+
+  void addLog({
+    organizationId: orgId,
+    userId: auth.userId,
+    action: "organization_details_update",
+    params: { ...details },
   });
 
   revalidatePath("/organization");

@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 import { EventsList } from "~/components/events/events-list";
-import { getAllEvents } from "~/server/events";
+import { getAllEvents, getEventsForUser } from "~/server/events";
 
 export default function HomePage() {
   return (
@@ -15,7 +15,7 @@ export default function HomePage() {
 }
 
 async function MyHomePage() {
-  const { data, error } = await getAllEvents();
+  const { data, error } = await getEventsForUser();
   if (error || !data) {
     return <div className="text-red-500">Error: {error}</div>;
   }

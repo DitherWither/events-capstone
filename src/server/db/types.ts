@@ -16,7 +16,7 @@ export type User = typeof users.$inferSelect;
 /**
  * User data type for public operations (excludes sensitive fields)
  */
-export type PublicUser = Omit<User, "passwordHash">;
+export type PublicUser = Omit<User, "passwordHash" | "locationLastKnown">;
 
 /**
  * Organization data type inferred from the database schema
@@ -78,6 +78,7 @@ export type CreateEvent = {
   organizationId: number;
   title: string;
   description?: string;
+  date?: Date;
   body?: string;
 };
 
@@ -85,5 +86,7 @@ export type UpdateEvent = {
   title?: string;
   description?: string;
   body?: string;
+  date?: Date;
   published?: boolean;
+  registrationLink?: string;
 };

@@ -27,6 +27,7 @@ export async function createOrganization(
   orgData: {
     name: string;
     description?: string;
+    location?: { x: number; y: number };
   },
   tx?: TransactionType,
 ): Promise<Result<number, string>> {
@@ -44,6 +45,46 @@ export async function createOrganization(
   } catch (error) {
     console.error("Database error during organization creation:", error);
     return failure("Database error during organization creation");
+  }
+}
+
+export async function updateOrganizationDetails(
+  id: number,
+  orgDetails: {
+    name?: string;
+    description?: string;
+    addressLine1?: string;
+    addressLine2?: string;
+    city?: string;
+    state?: string;
+    postalCode?: string;
+    googleMapsLink?: string;
+    location?: { x: number; y: number };
+  },
+) {
+  try {
+    const [result] = await db
+      .update(organizations)
+      .set({
+        name: orgDetails.name ?? undefined,
+        description: orgDetails.description ?? undefined,
+        location: orgDetails.location ?? undefined,
+        addressLine1: orgDetails.addressLine1 ?? undefined,
+        addressLine2: orgDetails.addressLine2 ?? undefined,
+        city: orgDetails.city ?? undefined,
+        state: orgDetails.state ?? undefined,
+        postalCode: orgDetails.postalCode ?? undefined,
+        googleMapsLink: orgDetails.googleMapsLink ?? undefined,
+      })
+      .where(eq(organizations.id, id))
+      .returning({ id: organizations.id });
+
+    return result
+      ? success(result.id)
+      : failure("Failed to update organization info");
+  } catch (error) {
+    console.error("Database error updating organization info:", error);
+    return failure("Database error updating organization info");
   }
 }
 
@@ -167,6 +208,13 @@ export async function getOrganizationInvitesForUser(
           id: organizations.id,
           name: organizations.name,
           description: organizations.description,
+          location: organizations.location,
+          addressLine1: organizations.addressLine1,
+          addressLine2: organizations.addressLine2,
+          city: organizations.city,
+          state: organizations.state,
+          postalCode: organizations.postalCode,
+          googleMapsLink: organizations.googleMapsLink,
           createdAt: organizations.createdAt,
         },
       })
@@ -347,6 +395,13 @@ export async function getOrganizationInviteById(
           id: organizations.id,
           name: organizations.name,
           description: organizations.description,
+          location: organizations.location,
+          addressLine1: organizations.addressLine1,
+          addressLine2: organizations.addressLine2,
+          city: organizations.city,
+          state: organizations.state,
+          postalCode: organizations.postalCode,
+          googleMapsLink: organizations.googleMapsLink,
           createdAt: organizations.createdAt,
         },
       })
@@ -381,6 +436,13 @@ export async function getOrganizationById(
         id: organizations.id,
         name: organizations.name,
         description: organizations.description,
+        location: organizations.location,
+        addressLine1: organizations.addressLine1,
+        addressLine2: organizations.addressLine2,
+        city: organizations.city,
+        state: organizations.state,
+        postalCode: organizations.postalCode,
+        googleMapsLink: organizations.googleMapsLink,
         createdAt: organizations.createdAt,
         members: {
           role: organizationMembers.role,
@@ -411,6 +473,13 @@ export async function getOrganizationById(
       id: orgFirst.id,
       name: orgFirst.name,
       description: orgFirst.description,
+      location: orgFirst.location,
+      addressLine1: orgFirst.addressLine1,
+      addressLine2: orgFirst.addressLine2,
+      city: orgFirst.city,
+      state: orgFirst.state,
+      postalCode: orgFirst.postalCode,
+      googleMapsLink: orgFirst.googleMapsLink,
       createdAt: orgFirst.createdAt,
       members: org
         .filter((m) => m.members !== null && m.user !== null)
