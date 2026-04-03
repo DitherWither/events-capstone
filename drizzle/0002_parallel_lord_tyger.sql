@@ -1,0 +1,1 @@
+ALTER TABLE "events_capstone_events" ADD COLUMN "date" timestamp;

@@ -8,11 +8,15 @@ import {
   getEventById,
   updateEvent,
   deleteEvent,
+  getEventsForLocation,
+  watchEvent,
+  unwatchEvent,
 } from "./db/event";
 import type { CreateEvent, UpdateEvent } from "./db/types";
 import { getAuthOrganization } from "./organization";
 import { revalidatePath } from "next/cache";
 import { addLog } from "./db/audit-logs";
+import { getCurrentUser } from "./auth";
 
 // Currently just wrappers, as we don't have any filtering or recommendations
 
@@ -20,13 +24,29 @@ export async function getAllEvents() {
   return getPublishedEvents();
 }
 
+export async function getEventsForUser() {
+  // Get user
+  const userResult = await getCurrentUser();
+
+  if (!userResult.data?.locationLastKnown) {
+    return getPublishedEvents();
+  }
+
+  return getEventsForLocation(
+    userResult.data.locationLastKnown,
+    userResult.data.id,
+  );
+}
+
 export async function getEventsForOrganization(organizationId: number) {
   return getOrganizationEvents(organizationId);
 }
 
 export async function getEventByIdAction(eventId: number) {
+  const userResult = await getCurrentUser();
+
   // TODO: If user not part of org, return not found if not published
-  return getEventById(eventId);
+  return getEventById(eventId, userResult.data?.id);
 }
 
 export async function newEvent(event: CreateEvent) {
@@ -122,5 +142,29 @@ export async function deleteEventAction(eventId: number) {
   }
 
   revalidatePath("/");
+  return res;
+}
+
+export async function watchEventAction(eventId: number) {
+  const userResult = await getCurrentUser();
+
+  if (!userResult.data) {
+    return failure("User not authenticated");
+  }
+
+  const res = watchEvent(eventId, userResult.data.id);
+  revalidatePath(`/events/${eventId}`);
+  return res;
+}
+
+export async function unwatchEventAction(eventId: number) {
+  const userResult = await getCurrentUser();
+
+  if (!userResult.data) {
+    return failure("User not authenticated");
+  }
+
+  const res = unwatchEvent(eventId, userResult.data.id);
+  revalidatePath(`/events/${eventId}`);
   return res;
 }

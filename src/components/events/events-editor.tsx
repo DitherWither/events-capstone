@@ -11,6 +11,7 @@ import { deleteEventAction, updateEventAction } from "~/server/events";
 import { useRouter } from "next/navigation";
 import { Checkbox } from "../ui/checkbox";
 import { SimpleEditor } from "../tiptap-templates/simple/simple-editor";
+import { DatePickerInput } from "../ui/date-picker";
 
 export function EventsEditor({
   event,
@@ -25,6 +26,9 @@ export function EventsEditor({
     description: event.description ?? "",
     body: event.body ?? "",
     published: event.published,
+
+    date: event.date ? new Date(event.date) : null,
+    registrationLink: event.registrationLink ?? "",
     // Temporary hack to make discard text work
     // This is because currently, calling
     // setFormData on formData.body does nothing
@@ -54,6 +58,8 @@ export function EventsEditor({
         description: formData.description.trim() || undefined,
         body: formData.body.trim() || undefined,
         published: formData.published,
+        registrationLink: formData.registrationLink.trim() || undefined,
+        date: formData.date || undefined,
       });
 
       if (error || !data) {
@@ -72,6 +78,8 @@ export function EventsEditor({
         description: data.description ?? "",
         body: data.body ?? "",
         published: data.published,
+        date: data.date ? new Date(data.date) : null,
+        registrationLink: data.registrationLink ?? "",
         bkey: formData.bkey + 1,
       });
     } finally {
@@ -90,6 +98,63 @@ export function EventsEditor({
           }
         }}
       >
+        <div className="flex w-full justify-between px-4">
+          <div className="flex justify-center">
+            {isAdmin && (
+              <div className="flex items-center justify-center gap-2">
+                <Checkbox
+                  id="published"
+                  checked={formData.published}
+                  onCheckedChange={(e) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      published: e as boolean,
+                    }))
+                  }
+                />
+                <Label htmlFor="published">Event Published</Label>
+              </div>
+            )}
+          </div>
+          {/* TODO: Confirmation Dialog */}
+          <div className="flex justify-end gap-1">
+            <Button
+              variant="destructive"
+              onClick={async (e) => {
+                setIsSaving(true);
+                const { error } = await deleteEventAction(event.id);
+                if (error) {
+                  setSaveError(error);
+                } else {
+                  router.push(`/organization/${event.organizationId}/events`);
+                }
+              }}
+            >
+              Delete Event (DESTRUCTIVE)
+            </Button>
+            <Button
+              variant="outline"
+              onClick={(e) => {
+                setFormData((prev) => ({
+                  title: event.title ?? "",
+                  description: event.description ?? "",
+                  body: event.body ?? "",
+                  published: event.published,
+                  date: event.date ? new Date(event.date) : null,
+                  registrationLink: event.registrationLink ?? "",
+                  bkey: prev.bkey + 1,
+                }));
+              }}
+              disabled={isSaving}
+            >
+              Discard Changes
+            </Button>
+            <Button onClick={handleSave} disabled={isSaving}>
+              {isSaving ? "Saving..." : "Save Event"}
+            </Button>
+          </div>
+        </div>
+        <hr />
         <div className="container mx-auto grid max-w-4xl gap-2 py-4">
           <input
             id="title"
@@ -98,6 +163,25 @@ export function EventsEditor({
             value={formData.title}
             onChange={(e) =>
               setFormData((prev) => ({ ...prev, title: e.target.value }))
+            }
+            disabled={isSaving}
+          />
+          <DatePickerInput
+            label="Event Date"
+            date={formData.date ?? undefined}
+            setDate={(date) =>
+              setFormData((prev) => ({ ...prev, date: date || null }))
+            }
+          />
+          <Input
+            id="registrationLink"
+            placeholder="Enter registration link"
+            value={formData.registrationLink ?? ""}
+            onChange={(e) =>
+              setFormData((prev) => ({
+                ...prev,
+                registrationLink: e.target.value,
+              }))
             }
             disabled={isSaving}
           />
@@ -115,18 +199,6 @@ export function EventsEditor({
             disabled={isSaving}
             rows={3}
           />
-          {isAdmin && (
-            <div className="flex gap-2">
-              <Checkbox
-                id="published"
-                checked={formData.published}
-                onCheckedChange={(e) =>
-                  setFormData((prev) => ({ ...prev, published: e as boolean }))
-                }
-              />
-              <Label htmlFor="published">Event Published</Label>
-            </div>
-          )}
         </div>
         <SimpleEditor
           content={formData.body}
@@ -141,41 +213,6 @@ export function EventsEditor({
             <AlertDescription>{saveError}</AlertDescription>
           </Alert>
         )}
-      </div>
-      <div className="flex w-full justify-end gap-1">
-        {/* TODO: Confirmation Dialog */}
-        <Button
-          variant="destructive"
-          onClick={async (e) => {
-            setIsSaving(true);
-            const { error } = await deleteEventAction(event.id);
-            if (error) {
-              setSaveError(error);
-            } else {
-              router.push(`/organization/${event.organizationId}/events`);
-            }
-          }}
-        >
-          Delete Event (DESTRUCTIVE)
-        </Button>
-        <Button
-          variant="outline"
-          onClick={(e) => {
-            setFormData((prev) => ({
-              title: event.title ?? "",
-              description: event.description ?? "",
-              body: event.body ?? "",
-              published: event.published,
-              bkey: prev.bkey + 1,
-            }));
-          }}
-          disabled={isSaving}
-        >
-          Discard Changes
-        </Button>
-        <Button onClick={handleSave} disabled={isSaving}>
-          {isSaving ? "Saving..." : "Save Event"}
-        </Button>
       </div>
     </>
   );

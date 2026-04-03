@@ -103,6 +103,27 @@ export async function userExistsByEmail(
   }
 }
 
+export async function setUserLocation(
+  id: number,
+  location: { x: number; y: number },
+) {
+  try {
+    const [result] = await db
+      .update(users)
+      .set({ locationLastKnown: location })
+      .where(eq(users.id, id))
+      .returning({ id: users.id });
+
+    if (!result) {
+      return failure(`Failed to find user ${id} when updating location`);
+    }
+    return success(undefined);
+  } catch (error) {
+    console.error("Database error when updating location: ", error);
+    return failure("Database error when updating location");
+  }
+}
+
 /**
  * Converts a full user object to a public user object (removes sensitive data)
  *
