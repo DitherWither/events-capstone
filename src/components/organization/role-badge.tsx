@@ -23,8 +23,15 @@ const getRoleIcon = (role: string) => {
   }
 };
 
-export function RoleBadge({ role, className }: { role: OrganizationMemberRole, className?: string }) {
-  const capitalizedRole = role.charAt(0).toUpperCase() + role.slice(1).toLowerCase();
+export function RoleBadge({
+  role,
+  className,
+}: {
+  role: OrganizationMemberRole;
+  className?: string;
+}) {
+  const capitalizedRole =
+    role.charAt(0).toUpperCase() + role.slice(1).toLowerCase();
   return (
     <Badge className={cn(getRoleColor(role), className)}>
       <div className="flex items-center gap-1">

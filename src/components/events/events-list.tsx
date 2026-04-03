@@ -83,9 +83,10 @@ export function EventsList({
     description: string | null;
     body: string | null;
     published: boolean;
+    registrationLink: string | null;
+    watchersCount?: number | undefined;
     createdAt: Date | null;
     date: Date | null;
-    watchersCount: number;
     organization: {
       name: string;
       description: string | null;
@@ -93,8 +94,12 @@ export function EventsList({
         x: number;
         y: number;
       } | null;
+      addressLine1: string | null;
+      addressLine2: string | null;
       city: string | null;
       state: string | null;
+      postalCode: string | null;
+      googleMapsLink: string | null;
       createdAt: Date | null;
       distance?: number | undefined;
     } | null;

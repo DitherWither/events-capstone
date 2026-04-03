@@ -20,5 +20,6 @@ async function MyHomePage() {
     return <div className="text-red-500">Error: {error}</div>;
   }
 
+  //@ts-ignore
   return <EventsList events={data} />;
 }
