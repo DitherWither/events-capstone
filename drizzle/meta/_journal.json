@@ -29,6 +29,20 @@
       "when": 1775225947135,
       "tag": "0003_handy_venus",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1775397846907,
+      "tag": "0004_aromatic_lilith",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1775401943764,
+      "tag": "0005_modern_nighthawk",
+      "breakpoints": true
     }
   ]
 }
