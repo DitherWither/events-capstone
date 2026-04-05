@@ -1,0 +1,2 @@
+ALTER TABLE "events_capstone_event_watchers" ADD COLUMN "notified_previous_week" boolean DEFAULT false NOT NULL;--> statement-breakpoint
+ALTER TABLE "events_capstone_users" ADD COLUMN "verified" boolean DEFAULT false;

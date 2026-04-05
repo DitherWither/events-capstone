@@ -26,6 +26,7 @@ export const users = createTable("users", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
   email: text("email").notNull().unique(),
+  verified: boolean("verified").default(false),
   locationLastKnown: geometry("location_last_known", {
     type: "point",
     mode: "xy",
@@ -132,6 +133,12 @@ export const eventWatchers = createTable(
     userId: serial("user_id")
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
+    notifiedPreviousWeek: boolean("notified_previous_day")
+      .notNull()
+      .default(false),
+    notifiedPreviousDay: boolean("notified_previous_week")
+      .notNull()
+      .default(false),
     createdAt: timestamp("created_at").defaultNow(),
   },
   (table) => [

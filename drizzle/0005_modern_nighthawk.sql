@@ -1,0 +1,1 @@
+ALTER TABLE "events_capstone_event_watchers" ADD COLUMN "notified_previous_day" boolean DEFAULT false NOT NULL;
