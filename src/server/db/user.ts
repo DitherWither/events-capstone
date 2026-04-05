@@ -132,7 +132,12 @@ export async function setUserLocation(
  */
 export function toPublicUser(user: User): PublicUser {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { passwordHash, locationLastKnown, verificationKey, ...publicUser } =
-    user;
+  const {
+    passwordHash,
+    locationLastKnown,
+    verificationKey,
+    verified,
+    ...publicUser
+  } = user;
   return publicUser;
 }
