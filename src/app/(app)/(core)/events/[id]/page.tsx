@@ -28,7 +28,7 @@ import {
 export default async function EventPage({
   params,
 }: {
-  params: Promise<{ id: string; eventId: string }>;
+  params: Promise<{ id: string }>;
 }) {
   const id = Number((await params).id);
   if (isNaN(id)) {

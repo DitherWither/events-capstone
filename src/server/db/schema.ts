@@ -27,6 +27,16 @@ export const users = createTable("users", {
   name: text("name").notNull(),
   email: text("email").notNull().unique(),
   verified: boolean("verified").default(false),
+  verificationKey: text("verification_key").$defaultFn(() => {
+    const length = 16;
+    let result = "";
+    const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    const charactersLength = characters.length;
+    for (var i = 0; i < length; i++) {
+      result += characters.charAt(Math.floor(Math.random() * charactersLength));
+    }
+    return result;
+  }),
   locationLastKnown: geometry("location_last_known", {
     type: "point",
     mode: "xy",

@@ -14,6 +14,7 @@ import {
 import type { PublicUser, User } from "./db/types";
 import { failure, success, type Result } from "~/lib/try-catch";
 import { revalidatePath } from "next/cache";
+import { resend } from "./resend";
 
 /**
  * Private helper function to set the userId cookie with consistent configuration.
@@ -154,6 +155,17 @@ export async function register(params: {
     return failure("Failed to retrieve created user");
   }
 
+  await resend.emails.send({
+    from: "Cappuchino Events <cappuchino-events@dither.dev>",
+    to: user.email,
+    subject: "Verify your account",
+    html: `
+    <h1>Verify your Account</h1>
+    <p>You need to click on the link below before you get any reminder emails</p>
+    <a href="${process.env.APP_URL}/verify/${user.verificationKey}">${process.env.APP_URL}/verify/${user.verificationKey}</a>
+    `,
+  });
+
   return success(toPublicUser(user));
 }
 
@@ -179,6 +191,7 @@ export async function getCurrentUser(): Promise<
   Result<
     | (PublicUser & {
         locationLastKnown: User["locationLastKnown"];
+        verificationKey: User["verificationKey"];
       })
     | null,
     string
@@ -218,6 +231,7 @@ export async function getCurrentUser(): Promise<
   return success({
     ...toPublicUser(userResult.data!),
     locationLastKnown: userResult.data!.locationLastKnown,
+    verificationKey: userResult.data!.verificationKey,
   });
 }
 

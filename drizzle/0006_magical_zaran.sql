@@ -1,0 +1,1 @@
+ALTER TABLE "events_capstone_users" ADD COLUMN "verification_key" text;
