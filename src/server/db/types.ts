@@ -16,7 +16,10 @@ export type User = typeof users.$inferSelect;
 /**
  * User data type for public operations (excludes sensitive fields)
  */
-export type PublicUser = Omit<User, "passwordHash" | "locationLastKnown">;
+export type PublicUser = Omit<
+  User,
+  "passwordHash" | "locationLastKnown" | "verificationKey"
+>;
 
 /**
  * Organization data type inferred from the database schema
