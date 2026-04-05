@@ -18,7 +18,7 @@ export type User = typeof users.$inferSelect;
  */
 export type PublicUser = Omit<
   User,
-  "passwordHash" | "locationLastKnown" | "verificationKey"
+  "passwordHash" | "locationLastKnown" | "verificationKey" | "verified"
 >;
 
 /**

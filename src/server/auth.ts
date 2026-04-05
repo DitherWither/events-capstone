@@ -192,6 +192,7 @@ export async function getCurrentUser(): Promise<
     | (PublicUser & {
         locationLastKnown: User["locationLastKnown"];
         verificationKey: User["verificationKey"];
+        verified: User["verified"];
       })
     | null,
     string
@@ -232,6 +233,7 @@ export async function getCurrentUser(): Promise<
     ...toPublicUser(userResult.data!),
     locationLastKnown: userResult.data!.locationLastKnown,
     verificationKey: userResult.data!.verificationKey,
+    verified: userResult.data!.verified,
   });
 }
 
