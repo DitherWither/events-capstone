@@ -126,7 +126,7 @@ export function EventsList({
       return [...events].sort((a, b) => {
         if (a.organization?.distance === undefined) return 1;
         if (b.organization?.distance === undefined) return -1;
-        return b.organization.distance - a.organization.distance;
+        return a.organization.distance - b.organization.distance;
       });
     } else {
       return [...events].sort((a, b) => {
