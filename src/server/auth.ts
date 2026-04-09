@@ -155,7 +155,7 @@ export async function register(params: {
     return failure("Failed to retrieve created user");
   }
 
-  await resend.emails.send({
+  void resend.emails.send({
     from: "Cappuchino Events <cappuchino-events@dither.dev>",
     to: user.email,
     subject: "Verify your account",
