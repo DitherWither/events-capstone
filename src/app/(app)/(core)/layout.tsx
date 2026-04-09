@@ -9,7 +9,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
   return (
     <>
-      <div className="flex w-full justify-between border-b p-4">
+      <div className="flex w-full flex-col gap-4 border-b p-4 md:flex-row md:justify-between">
         <Link href="/">
           <h1 className="text-3xl">Cappuchino Events</h1>
         </Link>

@@ -153,7 +153,7 @@ export function EventsList({
   }
 
   return (
-    <div>
+    <div className="px-4">
       <div className="flex justify-between">
         <Button variant="outline" className="mb-4">
           <LocationEditIcon className="mr-2 h-4 w-4" />

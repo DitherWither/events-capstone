@@ -23,15 +23,15 @@ function OrganizationCard({
       href={`/organization/${membership.organization.id}`}
     >
       <Card className="group w-full cursor-pointer transition-shadow hover:shadow-md">
-        <div className="flex items-start justify-start">
+        <div className="flex flex-col items-start justify-start md:flex-row">
           <Avatar className="ml-5 h-14 w-14">
             <AvatarFallback className="text-lg font-semibold">
               {getInitials(membership.organization.name)}
             </AvatarFallback>
           </Avatar>
-          <div className="flex-1 space-y-4">
+          <div className="space-y-4 md:flex-1">
             <CardHeader>
-              <div className="flex items-start justify-between gap-3">
+              <div className="mt-4 flex flex-col items-start justify-between gap-3 md:mt-0 md:flex-row">
                 <div className="flex-1">
                   <div className="mb-1 flex items-center gap-2">
                     <CardTitle className="group-hover:text-primary text-xl transition-colors">
