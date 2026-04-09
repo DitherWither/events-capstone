@@ -13,6 +13,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarProvider,
+  SidebarTrigger,
 } from "~/components/ui/sidebar";
 import { IconDashboard } from "@tabler/icons-react";
 
@@ -90,7 +91,13 @@ export default async function OrganizationLayout({
           </SidebarMenu>
         </SidebarFooter>
       </Sidebar>
-      <SidebarInset>{children}</SidebarInset>
+      <SidebarInset>
+        <SidebarTrigger
+          variant="secondary"
+          className="sticky top-1 left-1 md:hidden"
+        />
+        {children}
+      </SidebarInset>
     </SidebarProvider>
   );
 }

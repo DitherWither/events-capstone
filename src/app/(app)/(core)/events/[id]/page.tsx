@@ -57,7 +57,7 @@ async function EventViewer({ id }: { id: number }) {
     <div className="flex flex-col gap-1">
       <div className="flex justify-between">
         <h2 className="text-2xl font-semibold">{event.title}</h2>
-        <div>
+        <div className="flex gap-3">
           <form
             action={async () => {
               "use server";

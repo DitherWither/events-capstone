@@ -23,7 +23,7 @@ export default async function OrganizationPage() {
         >
           <ArrowLeft /> Back to Home
         </Link>
-        <div className="mb-12 flex items-center justify-between">
+        <div className="mb-12 flex flex-col justify-between md:flex-row md:items-center">
           <div>
             <h1 className="text-foreground mb-2 text-3xl font-bold">
               My Organizations
